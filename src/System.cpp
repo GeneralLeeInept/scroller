@@ -1,6 +1,7 @@
 #include "System.h"
 
 #include <SDL.h>
+#include <SDL_image.h>
 
 System::System(const string& title)
 	: m_window(nullptr)
@@ -9,6 +10,11 @@ System::System(const string& title)
 	if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER) != 0)
 	{
 		throw std::exception(SDL_GetError());
+	}
+
+	if ((IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) != IMG_INIT_PNG)
+	{
+		throw std::exception(IMG_GetError());
 	}
 
 	m_window = SDL_CreateWindow(title.c_str(), 100, 100, 640, 480, 0);
@@ -28,7 +34,8 @@ System::System(const string& title)
 
 System::~System()
 {
+	SDL_DestroyRenderer(m_renderer);
 	SDL_DestroyWindow(m_window);
-
+	IMG_Quit();
 	SDL_Quit();
 }

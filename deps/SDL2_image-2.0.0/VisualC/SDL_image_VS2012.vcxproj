@@ -126,6 +126,12 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>.\Debug/SDL2_image.bsc</OutputFile>
     </Bscmake>
+    <PostBuildEvent>
+      <Command>xcopy $(ProjectDir)external\lib\$(PlatformTarget)\*.* $(OutDir) /D /I /F /R /H /K  </Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying SDL2_image library files</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
@@ -198,6 +204,12 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>.\Release/SDL2_image.bsc</OutputFile>
     </Bscmake>
+    <PostBuildEvent>
+      <Command>xcopy $(ProjectDir)external\lib\$(PlatformTarget)\*.* $(OutDir) /D /I /F /R /H /K  </Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying SDL2_image library files</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>

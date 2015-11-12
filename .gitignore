@@ -1,6 +1,7 @@
 *.opensdf
 *.vcxproj.user
 *.suo
+*.sdf
 build/bin
 build/lib
 build/obj

@@ -1,0 +1,7 @@
+*.opensdf
+*.vcxproj.user
+*.suo
+build/bin
+build/lib
+build/obj
+art/raw

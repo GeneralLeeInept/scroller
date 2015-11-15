@@ -17,7 +17,7 @@ System::System(const string& title)
 		throw std::exception(IMG_GetError());
 	}
 
-	m_window = SDL_CreateWindow(title.c_str(), 100, 100, 640, 480, 0);
+	m_window = SDL_CreateWindow(title.c_str(), 100, 100, 1280, 720, 0);
 
 	if (!m_window)
 	{
@@ -38,4 +38,9 @@ System::~System()
 	SDL_DestroyWindow(m_window);
 	IMG_Quit();
 	SDL_Quit();
+}
+
+SDL_Renderer* System::GetRenderer() const
+{
+	return m_renderer;
 }

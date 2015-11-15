@@ -14,6 +14,8 @@ public:
 	System(const string& title);
 	~System();
 
+	SDL_Renderer* GetRenderer() const;
+
 	string GetError() const;
 
 private:

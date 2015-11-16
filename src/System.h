@@ -1,12 +1,6 @@
-#ifndef _SYSTEM_H
-#define _SYSTEM_H
+#pragma once
 
-#include <string>
-
-using namespace std;
-
-struct SDL_Renderer;
-struct SDL_Window;
+#include "Texture.h"
 
 class System
 {
@@ -16,11 +10,11 @@ public:
 
 	SDL_Renderer* GetRenderer() const;
 
+	TexturePtr LoadTexture(const string& path) const;
+
 	string GetError() const;
 
 private:
 	SDL_Window* m_window;
 	SDL_Renderer* m_renderer;
 };
-
-#endif

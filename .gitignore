@@ -5,4 +5,5 @@
 build/bin
 build/lib
 build/obj
+build/VisualC/ipch
 art/raw

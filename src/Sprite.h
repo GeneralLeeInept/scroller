@@ -1,7 +1,6 @@
-#ifndef _SPRITE_H
-#define _SPRITE_H
+#pragma once
 
-#include <SDL_rect.h>
+#include "Texture.h"
 
 struct SpriteDefinition
 {
@@ -19,6 +18,7 @@ struct SpriteDefinition
 
 	int m_numSequences;
 	Sequence* m_sequences;
+	TexturePtr m_texturePage;
 };
 
 class Sprite
@@ -36,5 +36,3 @@ private:
 	int m_frame;
 	float m_frameTimer;
 };
-
-#endif

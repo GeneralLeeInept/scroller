@@ -1,34 +1,16 @@
-#include <iostream>
+#include "stdafx.h"
 
 #include "System.h"
 
-#include <SDL.h>
-#include <SDL_image.h>
-
 int main(int argc, char** argv)
 {
-	SDL_Surface* image = nullptr;
-	SDL_Texture* texture = nullptr;
-
 	try
 	{
 		System system("Super Ryan Land");
 
-		image = IMG_Load("sprites/superryan.png");
-
-		if (!image)
-		{
-			throw std::exception("Failed to load sprite sheet");
-		}
-
-		texture = SDL_CreateTextureFromSurface(system.GetRenderer(), image);
-
-		if (!texture)
-		{
-			throw std::exception("Failed to create sprite texture");
-		}
-
 		bool quit = false;
+
+		TexturePtr texture = system.LoadTexture("sprites/superryan.png");
 
 		SDL_Rect destRect;
 		destRect.w = 256;
@@ -84,11 +66,10 @@ int main(int argc, char** argv)
 		}
 
 		SDL_DestroyTexture(texture);
-		SDL_FreeSurface(image);
 	}
-	catch (std::exception& e)
+	catch (exception& e)
 	{
-		std::cout << "Error: " << e.what() << std::endl;
+		cout << "Error: " << e.what() << endl;
 		return 1;
 	}
 

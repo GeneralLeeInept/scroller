@@ -127,7 +127,7 @@
       <OutputFile>.\Debug/SDL2_image.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>xcopy $(ProjectDir)external\lib\$(PlatformTarget)\*.* $(OutDir) /D /I /F /R /H /K  </Command>
+      <Command>xcopy $(ProjectDir)external\lib\$(PlatformTarget)\*.dll $(OutDir) /D /I /F /R /H /K  </Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copying SDL2_image library files</Message>
@@ -205,7 +205,7 @@
       <OutputFile>.\Release/SDL2_image.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>xcopy $(ProjectDir)external\lib\$(PlatformTarget)\*.* $(OutDir) /D /I /F /R /H /K  </Command>
+      <Command>xcopy $(ProjectDir)external\lib\$(PlatformTarget)\*.dll $(OutDir) /D /I /F /R /H /K  </Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copying SDL2_image library files</Message>

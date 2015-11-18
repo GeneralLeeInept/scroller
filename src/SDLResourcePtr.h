@@ -12,5 +12,10 @@ public:
 		reset(resource, DestroySDLResource<T>);
 	}
 
+	SDLResourcePtr() : SDLResourcePtr<T>(nullptr)
+	{
+
+	}
+
 	operator T*() { return get(); }
 };

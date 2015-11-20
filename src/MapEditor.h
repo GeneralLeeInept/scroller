@@ -34,4 +34,5 @@ private:
 	int m_brush;
 	TexturePtr m_brushTexture;
 	bool m_paint, m_erase, m_drawStatus;
+	TexturePtr m_backdrop;
 };

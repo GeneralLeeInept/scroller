@@ -159,6 +159,9 @@ void MapEditor::Update()
 
 void MapEditor::Draw(SDL_Renderer* renderer)
 {
+	SDL_Rect screenRect = { 0, 0, 1280, 720 };
+	SDL_RenderCopy(renderer, m_backdrop, nullptr, &screenRect);
+
 	// Draw map
 	SDL_SetRenderDrawColor(renderer, 128, 0, 128, 255);
 
@@ -173,10 +176,6 @@ void MapEditor::Draw(SDL_Renderer* renderer)
 			if (tileTexture)
 			{
 				SDL_RenderCopy(renderer, tileTexture, nullptr, &tileRect);
-			}
-			else
-			{
-				SDL_RenderFillRect(renderer, &tileRect);
 			}
 		}
 	}
@@ -251,6 +250,7 @@ vector<string> get_all_files_full_path_within_folder(string folder)
 void MapEditor::LoadResources(const System& system)
 {
 	m_cursor = system.LoadTexture("mapeditor/cursor.png");
+	m_backdrop = system.LoadTexture("backdrops/spooky.png");
 
 	vector<string> textures = get_all_files_full_path_within_folder("tiles/");
 

@@ -30,6 +30,13 @@ Vector2& Vector2::Sub(const Vector2& rhs)
 	return *this;
 }
 
+Vector2& Vector2::Mul(const Vector2& rhs)
+{
+	m_x *= rhs.m_x;
+	m_y *= rhs.m_y;
+	return *this;
+}
+
 Vector2& Vector2::Scale(float s)
 {
 	m_x *= s;

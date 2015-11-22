@@ -170,6 +170,8 @@ void CollisionTest::Update(Uint32 ticks)
 	int maxTileX = min((static_cast<int>(collisionBox.MaxX()) + 63) >> 6, MAPWIDTH - 1);
 	int maxTileY = min((static_cast<int>(collisionBox.MaxY()) + 63) >> 6, MAPHEIGHT - 1);
 
+	Vector2 posCorrect(0.f, 0.f);
+
 	for (int tileY = minTileY; tileY <= maxTileY; ++tileY)
 	{
 		for (int tileX = minTileX; tileX <= maxTileX; ++tileX)
@@ -179,12 +181,18 @@ void CollisionTest::Update(Uint32 ticks)
 			if (tile)
 			{
 				Aabb tileAabb;
-				tileAabb.m_origin.Set(tileX * TILESIZE + TILESIZE * 0.5f, tileY * TILESIZE + TILESIZE * 0.5f);
+				tileAabb.m_origin.Set((tileX + 0.5f) * TILESIZE, (tileY + 0.5f) * TILESIZE);
 				tileAabb.m_halfExtents.Set(TILESIZE * 0.5f, TILESIZE * 0.5f);
 				Vector2 contactNormal;
 				float contactDistance;
 				Collision::AabbVsAabb(currentBounds, tileAabb, contactNormal, contactDistance);
-				float nv = m_velocity.Dot(contactNormal) + max(contactDistance, 0.0f) / seconds;
+				float separation = max(contactDistance, 0.0f);
+				float penetration = min(contactDistance, 0.0f);
+				float nv = m_velocity.Dot(contactNormal) + separation / seconds;
+
+				Vector2 extrude(contactNormal);
+				extrude.Scale(penetration / seconds);
+				posCorrect.Sub(extrude);
 
 				if (nv < 0)
 				{
@@ -199,6 +207,7 @@ void CollisionTest::Update(Uint32 ticks)
 	if (m_update)
 	{
 		move = m_velocity;
+		move.Add(posCorrect);
 		move.Scale(seconds);
 		m_position.Add(move);
 

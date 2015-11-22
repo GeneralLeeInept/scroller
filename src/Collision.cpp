@@ -7,29 +7,37 @@
 namespace Collision
 {
 
-bool AabbVsAabb(const Aabb& a, const Aabb& b, Vector2& normal, float& distance)
+bool AabbVsAabbInternal(const Vector2& delta, const Vector2& origin, const Vector2& halfExtents, const Vector2& point,
+                        Vector2& normal, float& distance)
 {
-	Vector2 d;
-	d.Sub(a.m_origin, b.m_origin);
-
-	Vector2 extents(a.m_halfExtents);
-	extents.Add(b.m_halfExtents);
-
-	float edgeDist;
-
-	if (abs(d.m_x) > abs(d.m_y))
+	if (abs(delta.m_x) > abs(delta.m_y))
 	{
-		normal.Set(d.m_x > 0.0f ? 1.0f : -1.0f, 0.0f);
-		edgeDist = extents.m_x;
+		normal.Set(delta.m_x > 0.0f ? -1.0f : 1.0f, 0.0f);
 	}
 	else
 	{
-		normal.Set(0.0f, d.m_y > 0.0f ? 1.0f : -1.0f);
-		edgeDist = extents.m_y;
+		normal.Set(0.0f, delta.m_y > 0.0f ? -1.0f : 1.0f);
 	}
 
-	distance = normal.Dot(a.m_origin) - normal.Dot(b.m_origin) - edgeDist;
+	Vector2 planeCentre(normal);
+	planeCentre.Mul(halfExtents);
+	planeCentre.Add(origin);
 
+	Vector2 planeDelta(point);
+	planeDelta.Sub(planeCentre);
+	distance = planeDelta.Dot(normal);
+
+	return true;
+}
+
+bool AabbVsAabb(const Aabb& a, const Aabb& b, Vector2& normal, float& distance)
+{
+	Vector2 combinedExtents(b.m_halfExtents);
+	combinedExtents.Add(a.m_halfExtents);
+	Vector2 combinedPos(b.m_origin);
+	Vector2 delta(combinedPos);
+	delta.Sub(a.m_origin);
+	AabbVsAabbInternal(delta, combinedPos, combinedExtents, a.m_origin, normal, distance);
 	return true;
 }
 

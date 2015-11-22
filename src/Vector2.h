@@ -10,6 +10,8 @@ public:
 
 	Vector2& Add(const Vector2& rhs);
 	Vector2& Sub(const Vector2& rhs);
+	Vector2& Mul(const Vector2& rhs);
+
 	Vector2& Scale(float s);
 
 	Vector2& Sub(const Vector2& lhs, const Vector2& rhs);

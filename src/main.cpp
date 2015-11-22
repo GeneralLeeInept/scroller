@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include "CollisionTest.h"
 #include "MapEditor.h"
 #include "System.h"
 
@@ -12,7 +13,13 @@ int main(int argc, char** argv)
 
 		bool quit = false;
 
-		MapEditor editor(system);
+		//MapEditor editor(system);
+		CollisionTest collision(system);
+		Uint32 lastTicks = SDL_GetTicks();
+
+		collision.Update(0);
+		collision.Draw(system.GetRenderer());
+		SDL_RenderPresent(system.GetRenderer());
 
 		while (!quit)
 		{
@@ -21,7 +28,7 @@ int main(int argc, char** argv)
 
 			while (SDL_PollEvent(&e) != 0)
 			{
-				if (!editor.HandleEvent(e))
+				if (!collision.HandleEvent(e))
 				{
 					//User requests quit
 					if (e.type == SDL_QUIT)
@@ -32,15 +39,12 @@ int main(int argc, char** argv)
 			}
 
 			// Update state
-			editor.Update();
+			Uint32 ticks = SDL_GetTicks();
+			collision.Update(ticks - lastTicks);
+			lastTicks = ticks;
 
-			//Clear screen
-			SDL_SetRenderDrawColor(system.GetRenderer(), 84, 200, 255, 255);
-			SDL_RenderClear(system.GetRenderer());
-			SDL_SetRenderDrawColor(system.GetRenderer(), 0, 0, 0, 255);
-
-			//Draw 
-			editor.Draw(system.GetRenderer());
+			//Draw
+			collision.Draw(system.GetRenderer());
 
 			//Update screen
 			SDL_RenderPresent(system.GetRenderer());

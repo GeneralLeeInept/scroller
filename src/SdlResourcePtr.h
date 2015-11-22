@@ -4,18 +4,21 @@ template<typename T>
 void DestroySDLResource(T* resource);
 
 template<typename T>
-class SDLResourcePtr : public shared_ptr < T >
+class SdlResourcePtr : public shared_ptr < T >
 {
 public:
-	SDLResourcePtr(T* resource)
+	SdlResourcePtr(T* resource)
 	{
 		reset(resource, DestroySDLResource<T>);
 	}
 
-	SDLResourcePtr() : SDLResourcePtr<T>(nullptr)
+	SdlResourcePtr() : SdlResourcePtr<T>(nullptr)
 	{
 
 	}
 
-	operator T*() { return get(); }
+	operator T* ()
+	{
+		return get();
+	}
 };

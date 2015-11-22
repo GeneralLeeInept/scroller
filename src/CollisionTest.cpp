@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
-#include "AABB.h"
+#include "Aabb.h"
+#include "Collision.h"
 #include "CollisionTest.h"
 #include "System.h"
 
@@ -24,13 +25,13 @@ CollisionTest::CollisionTest(System& system)
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	};
 
@@ -95,9 +96,10 @@ bool CollisionTest::HandleEvent(SDL_Event& e)
 	return false;
 }
 
-AABB currentBounds;
-AABB newBounds;
-AABB collisionBox;
+Aabb currentBounds;
+Aabb newBounds;
+Aabb collisionBox;
+vector<Aabb> collideTiles;
 
 void CollisionTest::Update(Uint32 ticks)
 {
@@ -105,6 +107,7 @@ void CollisionTest::Update(Uint32 ticks)
 
 	if (m_update)
 	{
+		collideTiles.clear();
 
 		if (m_onGround)
 		{
@@ -162,13 +165,45 @@ void CollisionTest::Update(Uint32 ticks)
 	collisionBox = currentBounds;
 	collisionBox.Union(newBounds);
 
+	int minTileX = max(static_cast<int>(collisionBox.MinX()) >> 6, 0);
+	int minTileY = max(static_cast<int>(collisionBox.MinY()) >> 6, 0);
+	int maxTileX = min((static_cast<int>(collisionBox.MaxX()) + 63) >> 6, MAPWIDTH - 1);
+	int maxTileY = min((static_cast<int>(collisionBox.MaxY()) + 63) >> 6, MAPHEIGHT - 1);
+
+	for (int tileY = minTileY; tileY <= maxTileY; ++tileY)
+	{
+		for (int tileX = minTileX; tileX <= maxTileX; ++tileX)
+		{
+			int tile = m_mapData.at(tileY * MAPWIDTH + tileX);
+
+			if (tile)
+			{
+				Aabb tileAabb;
+				tileAabb.m_origin.Set(tileX * TILESIZE + TILESIZE * 0.5f, tileY * TILESIZE + TILESIZE * 0.5f);
+				tileAabb.m_halfExtents.Set(TILESIZE * 0.5f, TILESIZE * 0.5f);
+				Vector2 contactNormal;
+				float contactDistance;
+				Collision::AabbVsAabb(currentBounds, tileAabb, contactNormal, contactDistance);
+				float nv = m_velocity.Dot(contactNormal) + max(contactDistance, 0.0f) / seconds;
+
+				if (nv < 0)
+				{
+					collideTiles.push_back(tileAabb);
+					contactNormal.Scale(nv);
+					m_velocity.Sub(contactNormal);
+				}
+			}
+		}
+	}
+
 	if (m_update)
 	{
+		move = m_velocity;
+		move.Scale(seconds);
 		m_position.Add(move);
 
-		if (m_position.m_y > 640)
+		if (m_velocity.m_y < FLT_EPSILON && m_velocity.m_y > -FLT_EPSILON)
 		{
-			m_position.m_y = 640;
 			m_onGround = true;
 		}
 	}
@@ -222,4 +257,12 @@ void CollisionTest::Draw(SDL_Renderer* renderer)
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 	SDL_RenderFillRect(renderer, &testTilesRect);
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+
+	for (auto tile : collideTiles)
+	{
+		SDL_Rect drawRect;
+		SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+		tile.ToRect(drawRect);
+		SDL_RenderFillRect(renderer, &drawRect);
+	}
 }

@@ -1,15 +1,15 @@
 #include "stdafx.h"
 
-#include "AABB.h"
+#include "Aabb.h"
 
-AABB::AABB(const Vector2& origin, const Vector2& halfExtents)
+Aabb::Aabb(const Vector2& origin, const Vector2& halfExtents)
 	: m_origin(origin)
 	, m_halfExtents(halfExtents)
 {
 
 }
 
-AABB::AABB(const SDL_Rect& rect)
+Aabb::Aabb(const SDL_Rect& rect)
 {
 	m_halfExtents.m_x = rect.w * 0.5f;
 	m_halfExtents.m_y = rect.h * 0.5f;
@@ -17,7 +17,7 @@ AABB::AABB(const SDL_Rect& rect)
 	m_origin.m_y = rect.y + m_halfExtents.m_y;
 }
 
-AABB& AABB::Union(const AABB& other)
+Aabb& Aabb::Union(const Aabb& other)
 {
 	float minX = min(MinX(), other.MinX());
 	float minY = min(MinY(), other.MinY());
@@ -33,27 +33,27 @@ AABB& AABB::Union(const AABB& other)
 	return *this;
 }
 
-float AABB::MinX() const
+float Aabb::MinX() const
 {
 	return m_origin.m_x - m_halfExtents.m_x;
 }
 
-float AABB::MaxX() const
+float Aabb::MaxX() const
 {
 	return m_origin.m_x + m_halfExtents.m_x;
 }
 
-float AABB::MinY() const
+float Aabb::MinY() const
 {
 	return m_origin.m_y - m_halfExtents.m_y;
 }
 
-float AABB::MaxY() const
+float Aabb::MaxY() const
 {
 	return m_origin.m_y + m_halfExtents.m_y;
 }
 
-void AABB::ToRect(SDL_Rect& rect) const
+void Aabb::ToRect(SDL_Rect& rect) const
 {
 	rect.x = static_cast<int>(m_origin.m_x - m_halfExtents.m_x);
 	rect.y = static_cast<int>(m_origin.m_y - m_halfExtents.m_y);

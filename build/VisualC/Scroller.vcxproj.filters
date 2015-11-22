@@ -39,7 +39,10 @@
     <ClCompile Include="..\..\src\Vector2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\AABB.cpp">
+    <ClCompile Include="..\..\src\Aabb.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Collision.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -56,9 +59,6 @@
     <ClInclude Include="..\..\src\stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\SDLResourcePtr.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\MapEditor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -68,10 +68,16 @@
     <ClInclude Include="..\..\src\CollisionTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\AABB.h">
+    <ClInclude Include="..\..\src\Vector2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Vector2.h">
+    <ClInclude Include="..\..\src\Aabb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SdlResourcePtr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Collision.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

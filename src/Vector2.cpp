@@ -37,6 +37,13 @@ Vector2& Vector2::Scale(float s)
 	return *this;
 }
 
+Vector2& Vector2::Sub(const Vector2& lhs, const Vector2& rhs)
+{
+	m_x = lhs.m_x - rhs.m_x;
+	m_y = lhs.m_y - rhs.m_y;
+	return *this;
+}
+
 float Vector2::Dot(const Vector2& rhs) const
 {
 	return (m_x * rhs.m_x) + (m_y * rhs.m_y);

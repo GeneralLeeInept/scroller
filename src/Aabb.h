@@ -2,14 +2,14 @@
 
 #include "Vector2.h"
 
-class AABB
+class Aabb
 {
 public:
-	AABB() = default;
-	AABB(const Vector2& origin, const Vector2& halfExtents);
-	AABB(const SDL_Rect& rect);
+	Aabb() = default;
+	Aabb(const Vector2& origin, const Vector2& halfExtents);
+	Aabb(const SDL_Rect& rect);
 
-	AABB& Union(const AABB& other);
+	Aabb& Union(const Aabb& other);
 
 	float MinX() const;
 	float MaxX() const;

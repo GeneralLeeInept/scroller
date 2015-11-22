@@ -1,5 +1,5 @@
 #pragma once
 
-#include "SDLResourcePtr.h"
+#include "SdlResourcePtr.h"
 
-typedef SDLResourcePtr<SDL_Texture> TexturePtr;
+typedef SdlResourcePtr<SDL_Texture> TexturePtr;

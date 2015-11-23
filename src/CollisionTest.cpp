@@ -8,8 +8,8 @@
 #define MAPWIDTH 20
 #define MAPHEIGHT 11
 #define TILESIZE 64
-#define PLAYERWIDTH 60
-#define PLAYERHEIGHT 128
+#define PLAYERWIDTH 56
+#define PLAYERHEIGHT 112
 #define MAXSPEEDY 1000.f
 #define MAXSPEEDX 640.f
 #define JUMPSPEED -500.f
@@ -161,9 +161,9 @@ void CollisionTest::Update(Uint32 ticks)
 	currentBounds.m_halfExtents.Set(PLAYERWIDTH * 0.5f, PLAYERHEIGHT * 0.5f);
 
 	Aabb collisionBoxes[2];
-	collisionBoxes[0].m_origin.Add(currentBounds.m_origin, Vector2(0.0f, TILESIZE * 0.5f));
+	collisionBoxes[0].m_origin.Set(m_position.m_x, m_position.m_y - PLAYERHEIGHT * 0.25f);
 	collisionBoxes[0].m_halfExtents.Mul(currentBounds.m_halfExtents, Vector2(1.0f, 0.5f));
-	collisionBoxes[1].m_origin.Sub(currentBounds.m_origin, Vector2(0.f, TILESIZE * 0.5f));
+	collisionBoxes[1].m_origin.Set(m_position.m_x, m_position.m_y - PLAYERHEIGHT * 0.75f);
 	collisionBoxes[1].m_halfExtents.Mul(currentBounds.m_halfExtents, Vector2(1.0f, 0.5f));
 
 	newBounds = currentBounds;

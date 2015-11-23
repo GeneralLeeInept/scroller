@@ -25,4 +25,5 @@ private:
 	bool m_left = false;
 	bool m_right = false;
 	bool m_update = false;
+	bool m_diagnostics = false;
 };

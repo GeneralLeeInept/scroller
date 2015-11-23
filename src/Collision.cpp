@@ -19,8 +19,8 @@ bool AabbVsAabbInternal(const Vector2& delta, const Vector2& origin, const Vecto
 		normal.Set(0.0f, delta.m_y > 0.0f ? -1.0f : 1.0f);
 	}
 
-	Vector2 planeCentre(normal);
-	planeCentre.Mul(halfExtents);
+	Vector2 planeCentre;
+	planeCentre.Mul(normal, halfExtents);
 	planeCentre.Add(origin);
 
 	Vector2 planeDelta(point);
@@ -32,12 +32,13 @@ bool AabbVsAabbInternal(const Vector2& delta, const Vector2& origin, const Vecto
 
 bool AabbVsAabb(const Aabb& a, const Aabb& b, Vector2& normal, float& distance)
 {
-	Vector2 combinedExtents(b.m_halfExtents);
-	combinedExtents.Add(a.m_halfExtents);
+	Vector2 combinedExtents;
+	combinedExtents.Add(a.m_halfExtents, b.m_halfExtents);
 	Vector2 combinedPos(b.m_origin);
-	Vector2 delta(combinedPos);
-	delta.Sub(a.m_origin);
+	Vector2 delta;
+	delta.Sub(combinedPos, a.m_origin);
 	AabbVsAabbInternal(delta, combinedPos, combinedExtents, a.m_origin, normal, distance);
+
 	return true;
 }
 

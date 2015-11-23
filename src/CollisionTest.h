@@ -3,6 +3,7 @@
 #include "Texture.h"
 #include "Vector2.h"
 
+class Aabb;
 class System;
 
 class CollisionTest
@@ -15,6 +16,10 @@ public:
 	void Draw(SDL_Renderer* renderer);
 
 private:
+	void Collision1(Vector2& move, Vector2& posCorrect, float seconds);
+	void Collision2(Vector2& move, Vector2& posCorrect, float seconds);
+	void Collision2Inner(Vector2& move, int minTileX, int minTileY, int maxTileX, int maxTileY, Aabb& currentBounds);
+
 	TexturePtr m_tileTexture;
 	TexturePtr m_backdrop;
 	vector<int> m_mapData;

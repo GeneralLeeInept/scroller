@@ -16,6 +16,7 @@
 #define GRAVITY 1300.f
 #define HORIZONTAL_ACCELERATION 6400.f
 #define HORIZONTAL_FRICTION 1920.f
+#define HORIZONTAL_ACCELERATION_AIR 3200.f
 
 CollisionTest::CollisionTest(System& system)
 {
@@ -91,6 +92,12 @@ bool CollisionTest::HandleEvent(SDL_Event& e)
 				m_update = (e.type == SDL_KEYDOWN) ? !m_update : m_update;
 				return true;
 			}
+
+			case SDL_SCANCODE_D:
+			{
+				m_diagnostics = (e.type == SDL_KEYDOWN) ? !m_diagnostics : m_diagnostics;
+				return true;
+			}
 		}
 	}
 
@@ -128,9 +135,49 @@ void CollisionTest::Update(Uint32 ticks)
 			{
 				m_velocity.m_x += HORIZONTAL_ACCELERATION * seconds;
 			}
+		}
+		else
+		{
+			if (m_left)
+			{
+				m_velocity.m_x -= HORIZONTAL_ACCELERATION_AIR * seconds;
+			}
 
-			m_velocity.m_x = max(-MAXSPEEDX, min(m_velocity.m_x, MAXSPEEDX));
+			if (m_right)
+			{
+				m_velocity.m_x += HORIZONTAL_ACCELERATION_AIR * seconds;
+			}
+		}
 
+		m_velocity.m_x = max(-MAXSPEEDX, min(m_velocity.m_x, MAXSPEEDX));
+		m_velocity.m_y += GRAVITY * seconds;
+		m_velocity.m_y = max(-MAXSPEEDY, min(m_velocity.m_y, MAXSPEEDY));
+
+		m_onGround = false;
+		m_jump = false;
+	}
+
+	Vector2 move;
+	move.Scale(m_velocity, seconds);
+
+	// collision detection & response
+	Vector2 posCorrect;
+	Collision1(move, posCorrect, seconds);
+
+	if (m_update)
+	{
+		move.Add(m_velocity, posCorrect);
+		move.Scale(seconds);
+		m_position.Add(move);
+
+		if (m_velocity.m_y < FLT_EPSILON && m_velocity.m_y > -FLT_EPSILON)
+		{
+			m_velocity.m_y = 0.0f;
+			m_onGround = true;
+		}
+
+		if (m_onGround)
+		{
 			if (m_velocity.m_x > 64.f)
 			{
 				m_velocity.m_x -= HORIZONTAL_FRICTION * seconds;
@@ -143,88 +190,6 @@ void CollisionTest::Update(Uint32 ticks)
 			{
 				m_velocity.m_x = 0.f;
 			}
-		}
-
-		m_velocity.m_y += GRAVITY * seconds;
-		m_velocity.m_y = min(m_velocity.m_y, MAXSPEEDY);
-
-		m_onGround = false;
-		m_jump = false;
-	}
-
-	Vector2 move(m_velocity);
-	move.Scale(seconds);
-
-	// collision detection & response
-	currentBounds.m_origin = m_position;
-	currentBounds.m_origin.m_y -= (PLAYERHEIGHT * 0.5f);
-	currentBounds.m_halfExtents.Set(PLAYERWIDTH * 0.5f, PLAYERHEIGHT * 0.5f);
-
-	Aabb collisionBoxes[2];
-	collisionBoxes[0].m_origin.Set(m_position.m_x, m_position.m_y - PLAYERHEIGHT * 0.25f);
-	collisionBoxes[0].m_halfExtents.Mul(currentBounds.m_halfExtents, Vector2(1.0f, 0.5f));
-	collisionBoxes[1].m_origin.Set(m_position.m_x, m_position.m_y - PLAYERHEIGHT * 0.75f);
-	collisionBoxes[1].m_halfExtents.Mul(currentBounds.m_halfExtents, Vector2(1.0f, 0.5f));
-
-	newBounds = currentBounds;
-	newBounds.m_origin.Add(move);
-
-	collisionBox = currentBounds;
-	collisionBox.Union(newBounds);
-
-	int minTileX = max(static_cast<int>(collisionBox.MinX()) >> 6, 0);
-	int minTileY = max(static_cast<int>(collisionBox.MinY()) >> 6, 0);
-	int maxTileX = min((static_cast<int>(collisionBox.MaxX()) + 63) >> 6, MAPWIDTH - 1);
-	int maxTileY = min((static_cast<int>(collisionBox.MaxY()) + 63) >> 6, MAPHEIGHT - 1);
-
-	Vector2 posCorrect(0.f, 0.f);
-
-	for (int tileY = minTileY; tileY <= maxTileY; ++tileY)
-	{
-		for (int tileX = minTileX; tileX <= maxTileX; ++tileX)
-		{
-			int tile = m_mapData.at(tileY * MAPWIDTH + tileX);
-
-			if (tile)
-			{
-				Aabb tileAabb;
-				tileAabb.m_origin.Set((tileX + 0.5f) * TILESIZE, (tileY + 0.5f) * TILESIZE);
-				tileAabb.m_halfExtents.Set(TILESIZE * 0.5f, TILESIZE * 0.5f);
-
-				for (int box = 0; box < 2; ++box)
-				{
-					Vector2 contactNormal;
-					float contactDistance;
-					Collision::AabbVsAabb(collisionBoxes[box], tileAabb, contactNormal, contactDistance);
-					float separation = max(contactDistance, 0.0f);
-					float penetration = min(contactDistance, 0.0f);
-					float nv = m_velocity.Dot(contactNormal) + separation / seconds;
-
-					Vector2 extrude(contactNormal);
-					extrude.Scale(penetration / seconds);
-					posCorrect.Sub(extrude);
-
-					if (nv < 0)
-					{
-						collideTiles.push_back(tileAabb);
-						contactNormal.Scale(nv);
-						m_velocity.Sub(contactNormal);
-					}
-				}
-			}
-		}
-	}
-
-	if (m_update)
-	{
-		move = m_velocity;
-		move.Add(posCorrect);
-		move.Scale(seconds);
-		m_position.Add(move);
-
-		if (m_velocity.m_y < FLT_EPSILON && m_velocity.m_y > -FLT_EPSILON)
-		{
-			m_onGround = true;
 		}
 	}
 }
@@ -289,3 +254,118 @@ void CollisionTest::Draw(SDL_Renderer* renderer)
 		}
 	}
 }
+
+void CollisionTest::Collision1(Vector2& move, Vector2& posCorrect, float seconds)
+{
+	currentBounds.m_origin = m_position;
+	currentBounds.m_origin.m_y -= (PLAYERHEIGHT * 0.5f);
+	currentBounds.m_halfExtents.Set(PLAYERWIDTH * 0.5f, PLAYERHEIGHT * 0.5f);
+
+	Aabb collisionBoxes[2];
+	collisionBoxes[0].m_origin.Set(m_position.m_x, m_position.m_y - PLAYERHEIGHT * 0.25f);
+	collisionBoxes[0].m_halfExtents.Mul(currentBounds.m_halfExtents, Vector2(1.0f, 0.5f));
+	collisionBoxes[1].m_origin.Set(m_position.m_x, m_position.m_y - PLAYERHEIGHT * 0.75f);
+	collisionBoxes[1].m_halfExtents.Mul(currentBounds.m_halfExtents, Vector2(1.0f, 0.5f));
+
+	newBounds = currentBounds;
+	newBounds.m_origin.Add(move);
+
+	collisionBox = currentBounds;
+	collisionBox.Union(newBounds);
+
+	int minTileX = max(static_cast<int>(collisionBox.MinX()) >> 6, 0);
+	int minTileY = max(static_cast<int>(collisionBox.MinY()) >> 6, 0);
+	int maxTileX = min((static_cast<int>(collisionBox.MaxX()) + 63) >> 6, MAPWIDTH - 1);
+	int maxTileY = min((static_cast<int>(collisionBox.MaxY()) + 63) >> 6, MAPHEIGHT - 1);
+
+	for (int tileY = minTileY; tileY <= maxTileY; ++tileY)
+	{
+		for (int tileX = minTileX; tileX <= maxTileX; ++tileX)
+		{
+			int tile = m_mapData.at(tileY * MAPWIDTH + tileX);
+
+			if (tile)
+			{
+				Aabb tileAabb;
+				tileAabb.m_origin.Set((tileX + 0.5f) * TILESIZE, (tileY + 0.5f) * TILESIZE);
+				tileAabb.m_halfExtents.Set(TILESIZE * 0.5f, TILESIZE * 0.5f);
+
+				for (int box = 0; box < 2; ++box)
+				{
+					Vector2 contactNormal;
+					float contactDistance;
+					Collision::AabbVsAabb(collisionBoxes[box], tileAabb, contactNormal, contactDistance);
+					float separation = max(contactDistance, 0.0f);
+					float penetration = min(contactDistance, 0.0f);
+					float nv = m_velocity.Dot(contactNormal) + separation / seconds;
+
+					Vector2 extrude(contactNormal);
+					extrude.Scale(penetration / seconds);
+					posCorrect.Sub(extrude);
+
+					if (nv < 0)
+					{
+						collideTiles.push_back(tileAabb);
+						contactNormal.Scale(nv);
+						m_velocity.Sub(contactNormal);
+					}
+				}
+			}
+		}
+	}
+}
+
+
+void CollisionTest::Collision2(Vector2& move, Vector2& posCorrect, float seconds)
+{
+	currentBounds.m_origin = m_position;
+	currentBounds.m_origin.m_y -= (PLAYERHEIGHT * 0.5f);
+	currentBounds.m_halfExtents.Set(PLAYERWIDTH * 0.5f, PLAYERHEIGHT * 0.5f);
+
+	newBounds = currentBounds;
+	newBounds.m_origin.Add(move);
+
+	collisionBox = currentBounds;
+	collisionBox.Union(newBounds);
+
+	int minTileX = max(static_cast<int>(collisionBox.MinX()) >> 6, 0);
+	int minTileY = max(static_cast<int>(collisionBox.MinY()) >> 6, 0);
+	int maxTileX = min((static_cast<int>(collisionBox.MaxX()) + 63) >> 6, MAPWIDTH - 1);
+	int maxTileY = min((static_cast<int>(collisionBox.MaxY()) + 63) >> 6, MAPHEIGHT - 1);
+
+	// Move to first hit
+	Vector2 normal, bestNormal;
+	float t, bestT = FLT_MAX;
+	bool hit = false;
+
+	for (int tileY = minTileY; tileY <= maxTileY; ++tileY)
+	{
+		for (int tileX = minTileX; tileX <= maxTileX; ++tileX)
+		{
+			int tile = m_mapData.at(tileY * MAPWIDTH + tileX);
+
+			if (tile)
+			{
+				Aabb tileAabb;
+				tileAabb.m_origin.Set((tileX + 0.5f) * TILESIZE, (tileY + 0.5f) * TILESIZE);
+				tileAabb.m_halfExtents.Set(TILESIZE * 0.5f, TILESIZE * 0.5f);
+
+				Collision::SweepAabb(currentBounds, tileAabb, move, normal, t);
+
+				if (t < bestT)
+				{
+					bestT = t;
+					bestNormal = normal;
+					hit = true;
+				}
+			}
+		}
+	}
+
+	if (hit)
+	{
+		move.Scale(bestT);
+		m_velocity.Sub(normal.Scale(m_velocity.Dot(normal)));
+	}
+}
+

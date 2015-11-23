@@ -3,7 +3,7 @@
 class Vector2
 {
 public:
-	Vector2() = default;
+	Vector2();
 	Vector2(float x, float y);
 
 	Vector2& Set(float x, float y);

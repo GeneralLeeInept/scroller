@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Collision.h"
 #include "Texture.h"
 #include "Vector2.h"
 
@@ -16,11 +17,10 @@ public:
 	void Draw(SDL_Renderer* renderer);
 
 private:
-	void Collision1(Vector2& move, Vector2& posCorrect, float seconds);
-	void Collision2(Vector2& move, Vector2& posCorrect, float seconds);
-	void Collision2Inner(Vector2& move, int minTileX, int minTileY, int maxTileX, int maxTileY, Aabb& currentBounds);
+	void CollisionCheck(Vector2& move, Vector2& posCorrect, float seconds);
+	bool InternalEdge(const Collision::Hit& hit, int tileX, int tileY);
 
-	TexturePtr m_tileTexture;
+	vector<TexturePtr> m_tileTextures;
 	TexturePtr m_backdrop;
 	vector<int> m_mapData;
 	Vector2 m_position;

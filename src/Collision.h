@@ -1,10 +1,19 @@
 #pragma once
 
+#include "Vector2.h"
+
 class Aabb;
-class Vector2;
 
 namespace Collision
 {
-bool AabbVsAabb(const Aabb& a, const Aabb& b, Vector2& normal, float& distance);
-bool SweepAabb(const Aabb& a, const Aabb& b, const Vector2& delta, Vector2& normal, float& distance);
+
+struct Hit
+{
+	Vector2 m_normal;
+	float m_distance;
+};
+
+typedef function<bool(const Hit& hit)> HitFilter;
+
+bool AabbVsAabb(const Aabb& a, const Aabb& b, const HitFilter& hitFilter, Hit& hit);
 }

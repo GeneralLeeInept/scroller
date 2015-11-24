@@ -26,17 +26,18 @@ CollisionTest::CollisionTest(System& system)
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 2, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+		1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	};
 
-	m_tileTexture = system.LoadTexture("tiles/creepybricks.png");
+	m_tileTextures.push_back(system.LoadTexture("tiles/creepybricks.png"));
+	m_tileTextures.push_back(system.LoadTexture("tiles/creepybrickstop.png"));
 	m_backdrop = system.LoadTexture("backdrops/spooky.png");
 
 	m_position.Set(128.0f, 192.0f);
@@ -162,7 +163,7 @@ void CollisionTest::Update(Uint32 ticks)
 
 	// collision detection & response
 	Vector2 posCorrect;
-	Collision1(move, posCorrect, seconds);
+	CollisionCheck(move, posCorrect, seconds);
 
 	if (m_update)
 	{
@@ -211,7 +212,7 @@ void CollisionTest::Draw(SDL_Renderer* renderer)
 			if (tile)
 			{
 				SDL_Rect tileRect = { x * TILESIZE, y * TILESIZE, TILESIZE, TILESIZE };
-				SDL_RenderCopy(renderer, m_tileTexture, nullptr, &tileRect);
+				SDL_RenderCopy(renderer, m_tileTextures[tile - 1], nullptr, &tileRect);
 			}
 		}
 	}
@@ -255,7 +256,7 @@ void CollisionTest::Draw(SDL_Renderer* renderer)
 	}
 }
 
-void CollisionTest::Collision1(Vector2& move, Vector2& posCorrect, float seconds)
+void CollisionTest::CollisionCheck(Vector2& move, Vector2& posCorrect, float seconds)
 {
 	currentBounds.m_origin = m_position;
 	currentBounds.m_origin.m_y -= (PLAYERHEIGHT * 0.5f);
@@ -292,22 +293,25 @@ void CollisionTest::Collision1(Vector2& move, Vector2& posCorrect, float seconds
 
 				for (int box = 0; box < 2; ++box)
 				{
-					Vector2 contactNormal;
-					float contactDistance;
-					Collision::AabbVsAabb(collisionBoxes[box], tileAabb, contactNormal, contactDistance);
-					float separation = max(contactDistance, 0.0f);
-					float penetration = min(contactDistance, 0.0f);
-					float nv = m_velocity.Dot(contactNormal) + separation / seconds;
-
-					Vector2 extrude(contactNormal);
-					extrude.Scale(penetration / seconds);
-					posCorrect.Sub(extrude);
-
-					if (nv < 0)
+					Collision::Hit hit;
+					Collision::HitFilter hitFilter = bind(&CollisionTest::InternalEdge, this, placeholders::_1, tileX, tileY);
+					if (Collision::AabbVsAabb(collisionBoxes[box], tileAabb, hitFilter, hit))
 					{
-						collideTiles.push_back(tileAabb);
-						contactNormal.Scale(nv);
-						m_velocity.Sub(contactNormal);
+						float separation = max(hit.m_distance, 0.0f);
+						float penetration = min(hit.m_distance, 0.0f);
+						float nv = m_velocity.Dot(hit.m_normal) + separation / seconds;
+
+						Vector2 extrude(hit.m_normal);
+						extrude.Scale(penetration / seconds);
+						posCorrect.Sub(extrude);
+
+						if (nv < 0)
+						{
+							collideTiles.push_back(collisionBoxes[box]);
+							collideTiles.push_back(tileAabb);
+							hit.m_normal.Scale(nv);
+							m_velocity.Sub(hit.m_normal);
+						}
 					}
 				}
 			}
@@ -315,57 +319,16 @@ void CollisionTest::Collision1(Vector2& move, Vector2& posCorrect, float seconds
 	}
 }
 
-
-void CollisionTest::Collision2(Vector2& move, Vector2& posCorrect, float seconds)
+bool CollisionTest::InternalEdge(const Collision::Hit& hit, int tileX, int tileY)
 {
-	currentBounds.m_origin = m_position;
-	currentBounds.m_origin.m_y -= (PLAYERHEIGHT * 0.5f);
-	currentBounds.m_halfExtents.Set(PLAYERWIDTH * 0.5f, PLAYERHEIGHT * 0.5f);
+	int neighbourX = static_cast<int>(tileX + hit.m_normal.m_x);
+	int neighbourY = static_cast<int>(tileY + hit.m_normal.m_y);
 
-	newBounds = currentBounds;
-	newBounds.m_origin.Add(move);
-
-	collisionBox = currentBounds;
-	collisionBox.Union(newBounds);
-
-	int minTileX = max(static_cast<int>(collisionBox.MinX()) >> 6, 0);
-	int minTileY = max(static_cast<int>(collisionBox.MinY()) >> 6, 0);
-	int maxTileX = min((static_cast<int>(collisionBox.MaxX()) + 63) >> 6, MAPWIDTH - 1);
-	int maxTileY = min((static_cast<int>(collisionBox.MaxY()) + 63) >> 6, MAPHEIGHT - 1);
-
-	// Move to first hit
-	Vector2 normal, bestNormal;
-	float t, bestT = FLT_MAX;
-	bool hit = false;
-
-	for (int tileY = minTileY; tileY <= maxTileY; ++tileY)
+	if (neighbourX >= MAPWIDTH || neighbourY >= MAPHEIGHT)
 	{
-		for (int tileX = minTileX; tileX <= maxTileX; ++tileX)
-		{
-			int tile = m_mapData.at(tileY * MAPWIDTH + tileX);
-
-			if (tile)
-			{
-				Aabb tileAabb;
-				tileAabb.m_origin.Set((tileX + 0.5f) * TILESIZE, (tileY + 0.5f) * TILESIZE);
-				tileAabb.m_halfExtents.Set(TILESIZE * 0.5f, TILESIZE * 0.5f);
-
-				Collision::SweepAabb(currentBounds, tileAabb, move, normal, t);
-
-				if (t < bestT)
-				{
-					bestT = t;
-					bestNormal = normal;
-					hit = true;
-				}
-			}
-		}
+		return false;
 	}
 
-	if (hit)
-	{
-		move.Scale(bestT);
-		m_velocity.Sub(normal.Scale(m_velocity.Dot(normal)));
-	}
+	int tile = m_mapData.at(neighbourY * MAPWIDTH + neighbourX);
+	return (tile != 0);
 }
-

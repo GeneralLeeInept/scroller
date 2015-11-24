@@ -92,8 +92,10 @@
     <ClCompile Include="..\..\src\Aabb.cpp" />
     <ClCompile Include="..\..\src\Collision.cpp" />
     <ClCompile Include="..\..\src\CollisionTest.cpp" />
+    <ClCompile Include="..\..\src\GameController.cpp" />
     <ClCompile Include="..\..\src\GameMap.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
+    <ClCompile Include="..\..\src\MainMenu.cpp" />
     <ClCompile Include="..\..\src\MapEditor.cpp" />
     <ClCompile Include="..\..\src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -107,7 +109,10 @@
     <ClInclude Include="..\..\src\Aabb.h" />
     <ClInclude Include="..\..\src\Collision.h" />
     <ClInclude Include="..\..\src\CollisionTest.h" />
+    <ClInclude Include="..\..\src\GameController.h" />
     <ClInclude Include="..\..\src\GameMap.h" />
+    <ClInclude Include="..\..\src\IGameState.h" />
+    <ClInclude Include="..\..\src\MainMenu.h" />
     <ClInclude Include="..\..\src\MapEditor.h" />
     <ClInclude Include="..\..\src\SdlResourcePtr.h" />
     <ClInclude Include="..\..\src\Sprite.h" />

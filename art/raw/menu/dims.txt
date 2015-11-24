@@ -1,0 +1,6 @@
+Title - 703 x 225 @ 281, 52
+
+New Game - 430 x 63
+Map Editor - 498 x 72
+Sprite Editor - 592 x 72
+Quit - 182 x 59

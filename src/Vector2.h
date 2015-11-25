@@ -20,5 +20,6 @@ public:
 
 	float Dot(const Vector2& rhs) const;
 
-	float m_x, m_y;
+	float m_x;
+	float m_y;
 };

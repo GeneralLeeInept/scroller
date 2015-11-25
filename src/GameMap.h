@@ -33,7 +33,8 @@ private:
 	};
 
 
-	int m_width, m_height;  // In tiles
+	int m_width;
+	int m_height;  // In tiles
 	TexturePtr m_backdrop;
 	vector<ParallaxLayer> m_parallaxLayers;
 	vector<TileLayer> m_tileLayers;

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "MainMenu.h"
+#include "GameController.h"
 #include "System.h"
 
 #define NUMITEMS 4
@@ -25,6 +26,20 @@ static SDL_Point Dims[NUMITEMS] =
 	{ 182, 59 }
 };
 
+enum MenuItems
+{
+	kNewGame,
+	kMapEditor,
+	kSpriteEditor,
+	kQuit
+};
+
+enum ItemStates
+{
+	kInactive,
+	kActive
+};
+
 MainMenu::MainMenu(System& system, GameController& gameController)
 	: m_gameController(gameController)
 {
@@ -39,12 +54,12 @@ MainMenu::MainMenu(System& system, GameController& gameController)
 		mi.m_dims = Dims[i];
 		mi.m_position.x = ITEMPOSX;
 		mi.m_position.y = FIRSTITEMY + (ITEMSPACINGY * i) + (mi.m_dims.y >> 1);
-		mi.m_state = 0;
+		mi.m_state = kInactive;
 		mi.m_stateTime = 0;
 		m_menu.push_back(mi);
 	}
 
-	m_menu[0].m_state = 1;
+	m_menu[0].m_state = kActive;
 }
 
 bool MainMenu::HandleEvent(SDL_Event& event)
@@ -66,6 +81,7 @@ bool MainMenu::HandleEvent(SDL_Event& event)
 			}
 			case SDL_SCANCODE_RETURN:
 			{
+				m_accept = true;
 				return true;
 			}
 		}
@@ -83,13 +99,38 @@ void MainMenu::Update(Uint32 ms)
 
 	if (m_nextActive != -1)
 	{
-		m_menu[m_activeItem].m_state = 0;
+		m_menu[m_activeItem].m_state = kInactive;
 		m_menu[m_activeItem].m_stateTime = 0;
-		m_menu[m_nextActive].m_state = 1;
+		m_menu[m_nextActive].m_state = kActive;
 		m_menu[m_nextActive].m_stateTime = 0;
 		m_activeItem = m_nextActive;
 		m_nextActive = -1;
 	}
+	else if (m_accept)
+	{
+		switch (m_activeItem)
+		{
+			case kNewGame:
+			{
+				m_gameController.GotoState(GameController::kNewGame);
+				break;
+			}
+
+			case kMapEditor:
+			{
+				m_gameController.GotoState(GameController::kMapEditor);
+				break;
+			}
+
+			case kQuit:
+			{
+				m_gameController.Quit();
+				break;
+			}
+		}
+	}
+
+	m_accept = false;
 }
 
 void MainMenu::Draw(SDL_Renderer* renderer)

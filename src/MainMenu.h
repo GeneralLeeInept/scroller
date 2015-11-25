@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IGameState.h"
+
 #include "Texture.h"
 
 class GameController;
@@ -31,4 +32,5 @@ private:
 	vector<MenuItem> m_menu;
 	int m_activeItem = 0;
 	int m_nextActive = -1;
+	bool m_accept = false;
 };

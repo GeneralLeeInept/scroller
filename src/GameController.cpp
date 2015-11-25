@@ -4,6 +4,10 @@
 #include "IGameState.h"
 #include "System.h"
 
+#include "CollisionTest.h"
+#include "MainMenu.h"
+#include "MapEditor.h"
+
 GameController::GameController(System& system)
 	: m_system(system)
 {
@@ -18,10 +22,9 @@ void GameController::Run()
 	{
 		Uint32 ticks = SDL_GetTicks();
 
-		if (m_nextState != nullptr)
+		if (m_nextState != kNone)
 		{
-			m_currentState = m_nextState;
-			m_nextState = nullptr;
+			DoStateChange();
 			lastTicks = ticks; // Do a 0 ms update first time
 		}
 
@@ -65,7 +68,31 @@ void GameController::Quit()
 	m_quit = true;
 }
 
-void GameController::GotoState(shared_ptr<IGameState> nextState)
+void GameController::GotoState(GameState nextState)
 {
 	m_nextState = nextState;
+}
+
+void GameController::DoStateChange()
+{
+	switch (m_nextState)
+	{
+		case kMainMenu:
+		{
+			m_currentState.reset(new MainMenu(m_system, *this));
+			break;
+		}
+		case kNewGame:
+		{
+			m_currentState.reset(new CollisionTest(m_system));
+			break;
+		}
+		case kMapEditor:
+		{
+			m_currentState.reset(new MapEditor(m_system));
+			break;
+		}
+	}
+
+	m_nextState = kNone;
 }

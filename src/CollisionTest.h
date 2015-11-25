@@ -1,5 +1,7 @@
 #pragma once
 
+#include "IGameState.h"
+
 #include "Collision.h"
 #include "Texture.h"
 #include "Vector2.h"
@@ -7,7 +9,7 @@
 class Aabb;
 class System;
 
-class CollisionTest
+class CollisionTest : public IGameState
 {
 public:
 	CollisionTest(System& system);

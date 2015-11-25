@@ -1,5 +1,7 @@
 #pragma once
 
+#include "IGameState.h"
+
 #include "Texture.h"
 
 struct MapData
@@ -11,13 +13,13 @@ struct MapData
 
 class System;
 
-class MapEditor
+class MapEditor : public IGameState
 {
 public:
 	MapEditor(const System& system);
 
 	bool HandleEvent(SDL_Event& e);
-	void Update();
+	void Update(Uint32 ms);
 	void Draw(SDL_Renderer* renderer);
 
 private:

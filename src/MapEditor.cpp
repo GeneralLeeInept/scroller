@@ -1,7 +1,5 @@
 #include "stdafx.h"
 
-#include <Windows.h>
-
 #include "MapEditor.h"
 #include "System.h"
 
@@ -74,6 +72,22 @@ bool MapEditor::HandleEvent(SDL_Event& e)
 					return true;
 				}
 
+				case SDL_SCANCODE_GRAVE:
+				{
+					m_drawStatus = !m_drawStatus;
+					return true;
+				}
+			}
+
+			break;
+		}
+
+		case SDL_KEYDOWN:
+		{
+			SDL_KeyboardEvent& ke = reinterpret_cast<SDL_KeyboardEvent&>(e);
+
+			switch (ke.keysym.scancode)
+			{
 				case SDL_SCANCODE_LEFT:
 				{
 					--m_scrollX;
@@ -95,12 +109,6 @@ bool MapEditor::HandleEvent(SDL_Event& e)
 				case SDL_SCANCODE_DOWN:
 				{
 					++m_scrollY;
-					return true;
-				}
-
-				case SDL_SCANCODE_GRAVE:
-				{
-					m_drawStatus = !m_drawStatus;
 					return true;
 				}
 			}
@@ -135,8 +143,10 @@ bool MapEditor::HandleEvent(SDL_Event& e)
 	return false;
 }
 
-void MapEditor::Update()
+void MapEditor::Update(Uint32 ms)
 {
+	_CRT_UNUSED(ms);
+
 	m_cursorX = max(0, min(m_cursorX, MAXCURSORX));
 	m_cursorY = max(0, min(m_cursorY, MAXCURSORY));
 
@@ -222,37 +232,12 @@ void MapEditor::Draw(SDL_Renderer* renderer)
 	}
 }
 
-vector<string> get_all_files_full_path_within_folder(string folder)
-{
-	vector<string> names;
-	char search_path[200];
-	sprintf_s(search_path, 200, "%s*.*", folder.c_str());
-	WIN32_FIND_DATA fd;
-	HANDLE hFind = ::FindFirstFile(search_path, &fd);
-
-	if (hFind != INVALID_HANDLE_VALUE)
-	{
-		do
-		{
-			// read all (real) files in current folder, delete '!' read other 2 default folder . and ..
-			if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
-			{
-				names.push_back(folder + fd.cFileName);
-			}
-		}
-		while (::FindNextFile(hFind, &fd));
-
-		::FindClose(hFind);
-	}
-
-	return names;
-}
 void MapEditor::LoadResources(const System& system)
 {
 	m_cursor = system.LoadTexture("mapeditor/cursor.png");
 	m_backdrop = system.LoadTexture("backdrops/spooky.png");
 
-	vector<string> textures = get_all_files_full_path_within_folder("tiles/");
+	vector<string> textures = system.GetFilesInFolder("tiles/");
 
 	for (auto path : textures)
 	{
@@ -263,7 +248,7 @@ void MapEditor::LoadResources(const System& system)
 		}
 		catch (exception& e)
 		{
-
+			_CRT_UNUSED(e);
 		}
 	}
 }

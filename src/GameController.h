@@ -6,16 +6,26 @@ class System;
 class GameController
 {
 public:
+	enum GameState
+	{
+		kNone,
+		kMainMenu,
+		kNewGame,
+		kMapEditor
+	};
+
 	GameController(System& system);
 
 	void Run();
 	void Quit();
 
-	void GotoState(shared_ptr<IGameState> nextState);
+	void GotoState(GameState nextState);
 
 private:
+	void DoStateChange();
+
 	System& m_system;
 	shared_ptr<IGameState> m_currentState;
-	shared_ptr<IGameState> m_nextState;
+	GameState m_nextState = kMainMenu;
 	bool m_quit = false;
 };

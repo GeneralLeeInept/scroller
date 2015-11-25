@@ -14,7 +14,7 @@ public:
 	vector<string> GetFilesInFolder(const string& path) const;
 
 	string GetError() const;
-	
+
 private:
 	SDL_Window* m_window;
 	SDL_Renderer* m_renderer;

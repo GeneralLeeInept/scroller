@@ -36,7 +36,7 @@ bool AabbVsAabb(const Aabb& a, const Aabb& b, const HitFilter& hitFilter, Hit& h
 	Vector2 combinedPos(b.m_origin);
 	Vector2 delta;
 	delta.Sub(combinedPos, a.m_origin);
-	
+
 	AabbVsAabbInternal(delta, combinedPos, combinedExtents, a.m_origin, hit);
 	return !hitFilter(hit);
 }

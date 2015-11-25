@@ -67,6 +67,7 @@ bool MainMenu::HandleEvent(SDL_Event& event)
 	if (event.type == SDL_KEYDOWN)
 	{
 		SDL_KeyboardEvent& ke = reinterpret_cast<SDL_KeyboardEvent&>(event);
+
 		switch (ke.keysym.scancode)
 		{
 			case SDL_SCANCODE_UP:
@@ -74,11 +75,13 @@ bool MainMenu::HandleEvent(SDL_Event& event)
 				m_nextActive = (m_activeItem == 0) ? -1 : m_activeItem - 1;
 				return true;
 			}
+
 			case SDL_SCANCODE_DOWN:
 			{
 				m_nextActive = (m_activeItem == NUMITEMS - 1) ? -1 : m_activeItem + 1;
 				return true;
 			}
+
 			case SDL_SCANCODE_RETURN:
 			{
 				m_accept = true;
@@ -86,6 +89,7 @@ bool MainMenu::HandleEvent(SDL_Event& event)
 			}
 		}
 	}
+
 	return false;
 }
 
@@ -147,7 +151,7 @@ void MainMenu::Draw(SDL_Renderer* renderer)
 		SDL_Rect sourceRect = { 0, 0, mi.m_dims.x, mi.m_dims.y };
 		int destWidth = mi.m_dims.x;
 		int destHeight = mi.m_dims.y;
-		
+
 		if (mi.m_state == 1)
 		{
 			float t = (3.141f * mi.m_stateTime) / SCALEFREQ;

@@ -295,6 +295,7 @@ void CollisionTest::CollisionCheck(Vector2& move, Vector2& posCorrect, float sec
 				{
 					Collision::Hit hit;
 					Collision::HitFilter hitFilter = bind(&CollisionTest::InternalEdge, this, placeholders::_1, tileX, tileY);
+
 					if (Collision::AabbVsAabb(collisionBoxes[box], tileAabb, hitFilter, hit))
 					{
 						float separation = max(hit.m_distance, 0.0f);

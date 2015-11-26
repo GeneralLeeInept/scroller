@@ -66,5 +66,5 @@ TexturePtr System::LoadTexture(const string& path) const
 		throw exception("Failed to create sprite texture");
 	}
 
-	return TexturePtr(texture);
+	return TexturePtr(texture, path);
 }

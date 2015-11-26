@@ -24,22 +24,10 @@ static const SDL_Rect s_offscreenRects[4] =
 };
 
 MapEditor::MapEditor(const System& system)
-	: m_width(MAPWIDTH)
-	, m_height(MAPHEIGHT)
-	, m_scrollX(0)
-	, m_scrollY(0)
-	, m_cursor(nullptr)
-	, m_cursorX(0)
-	, m_cursorY(0)
-	, m_brush(-1)
-	, m_brushTexture(nullptr)
-	, m_paint(false)
-	, m_erase(false)
-	, m_drawStatus(true)
+	: m_mapData(MAPWIDTH, MAPHEIGHT)
+	, m_system(system)
 {
 	LoadResources(system);
-
-	m_mapData.resize(MAPHEIGHT * MAPWIDTH, -1);
 }
 
 bool MapEditor::HandleEvent(SDL_Event& e)
@@ -75,6 +63,36 @@ bool MapEditor::HandleEvent(SDL_Event& e)
 				case SDL_SCANCODE_GRAVE:
 				{
 					m_drawStatus = !m_drawStatus;
+					return true;
+				}
+
+				case SDL_SCANCODE_F1:
+				{
+					m_activeLayer = GameMap::kBackground;
+					return true;
+				}
+
+				case SDL_SCANCODE_F2:
+				{
+					m_activeLayer = GameMap::kPlayground;
+					return true;
+				}
+
+				case SDL_SCANCODE_F3:
+				{
+					m_activeLayer = GameMap::kForeground;
+					return true;
+				}
+
+				case SDL_SCANCODE_S:
+				{
+					m_mapData.Save("maps/test.map");
+					return true;
+				}
+
+				case SDL_SCANCODE_L:
+				{
+					m_mapData.Load("maps/test.map", m_system);
 					return true;
 				}
 			}
@@ -162,33 +180,14 @@ void MapEditor::Update(Uint32 ms)
 
 	if (m_paint || m_erase)
 	{
-		int& tile = TileAt(m_cursorX + m_scrollX, m_cursorY + m_scrollY);
-		tile = m_paint ? m_brush : -1;
+		m_mapData.SetTile(m_activeLayer, m_cursorX + m_scrollX, m_cursorY + m_scrollY, m_paint ? m_brushTexture : nullptr);
 	}
 }
 
 void MapEditor::Draw(SDL_Renderer* renderer)
 {
-	SDL_Rect screenRect = { 0, 0, 1280, 720 };
-	SDL_RenderCopy(renderer, m_backdrop, nullptr, &screenRect);
-
 	// Draw map
-	SDL_SetRenderDrawColor(renderer, 128, 0, 128, 255);
-
-	for (int y = 0; y < SCREENTILESY; ++y)
-	{
-		for (int x = 0; x < SCREENTILESX; ++x)
-		{
-			SDL_Rect tileRect = { x * TILESIZE, y * TILESIZE, TILESIZE, TILESIZE };
-			int tile = TileAt(x + m_scrollX, y + m_scrollY);
-			TexturePtr tileTexture = (tile < 0) ? nullptr : m_tileTextures[tile];
-
-			if (tileTexture)
-			{
-				SDL_RenderCopy(renderer, tileTexture, nullptr, &tileRect);
-			}
-		}
-	}
+	m_mapData.Draw(renderer, m_scrollX * TILESIZE, m_scrollY * TILESIZE);
 
 	// Draw overlays
 	SDL_SetRenderDrawColor(renderer, 128, 0, 0, 128);
@@ -234,8 +233,8 @@ void MapEditor::Draw(SDL_Renderer* renderer)
 
 void MapEditor::LoadResources(const System& system)
 {
+	m_mapData.SetBackdrop(system.LoadTexture("backdrops/spooky.png"));
 	m_cursor = system.LoadTexture("mapeditor/cursor.png");
-	m_backdrop = system.LoadTexture("backdrops/spooky.png");
 
 	vector<string> textures = system.GetFilesInFolder("tiles/");
 
@@ -244,21 +243,10 @@ void MapEditor::LoadResources(const System& system)
 		try
 		{
 			m_tileTextures.push_back(system.LoadTexture(path));
-			m_tileTexturePaths.push_back(path);
 		}
 		catch (exception& e)
 		{
 			_CRT_UNUSED(e);
 		}
 	}
-}
-
-int& MapEditor::TileAt(int x, int y)
-{
-	if (x < 0 || x >= MAPWIDTH || y < 0 || y >= MAPHEIGHT)
-	{
-		throw exception("Map coordinates out of range");
-	}
-
-	return m_mapData.at(y * MAPWIDTH + x);
 }

@@ -2,6 +2,7 @@
 
 #include "IGameState.h"
 
+#include "GameMap.h"
 #include "Texture.h"
 
 struct MapData
@@ -24,22 +25,19 @@ public:
 
 private:
 	void LoadResources(const System& system);
-	int& TileAt(int x, int y);
 
-	int m_width;
-	int m_height;  // in tiles
+	const System& m_system;
+	GameMap m_mapData;
 	vector<TexturePtr> m_tileTextures;
-	vector<string> m_tileTexturePaths;
-	vector<int> m_mapData;
-	int m_scrollX;
-	int m_scrollY;
-	TexturePtr m_cursor;
-	int m_cursorX;
-	int m_cursorY;
-	int m_brush;
-	TexturePtr m_brushTexture;
-	bool m_paint;
-	bool m_erase;
-	bool m_drawStatus;
-	TexturePtr m_backdrop;
+	int m_scrollX = 0;
+	int m_scrollY = 0;
+	TexturePtr m_cursor = nullptr;
+	int m_cursorX = 0;
+	int m_cursorY = 0;
+	int m_brush = -1;
+	TexturePtr m_brushTexture = nullptr;
+	bool m_paint = false;
+	bool m_erase = false;
+	bool m_drawStatus = true;
+	GameMap::TileLayer m_activeLayer = GameMap::kPlayground;
 };

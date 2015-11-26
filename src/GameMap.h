@@ -2,40 +2,40 @@
 
 #include "Texture.h"
 
+class System;
+
 class GameMap
 {
 public:
-	struct DiskHeader
+	enum TileLayer
 	{
-		char m_magic[4];
-		int m_width;
-		int m_height;
+		kBackground,
+		kPlayground,
+		kForeground
 	};
 
-	struct StringTable
-	{
-		int m_numStrings;
-	};
-	void load(const string& path);
+	GameMap() = default;
+	GameMap(int numTilesX, int numTilesY);
+
+	void Load(const string& path, const System& system);
+	void Save(const string& path);
+
+	int GetTile(TileLayer layer, int x, int y);
+	void SetTile(TileLayer layer, int x, int y, TexturePtr texture);
+
+	void SetBackdrop(TexturePtr texture);
+	void SetParallaxLayer(int layer, float scrollScale, TexturePtr texture);
+
+	void Draw(SDL_Renderer* renderer, int scrollX, int scrollY);
 
 private:
-	struct ParallaxLayer
-	{
-		TexturePtr m_image;
-		int m_maxScrollX, m_maxScrollY;
-	};
+	int TileIndex(int x, int y);
+	int AddTexture(TexturePtr texture);
 
-	struct TileLayer
-	{
-		static const int EmptySpace = -1;
-		vector<TexturePtr> m_tileTextures;
-		vector<int> m_tiles;    // MapWidth * MapHeight 0 based indexes into m_tileTextures.
-	};
-
-
-	int m_width;
-	int m_height;  // In tiles
-	TexturePtr m_backdrop;
-	vector<ParallaxLayer> m_parallaxLayers;
-	vector<TileLayer> m_tileLayers;
+	vector<TexturePtr> m_textures;
+	vector<int> m_tileMaps[3];
+	vector<int> m_parallaxLayers;
+	vector<float> m_parallaxScrollScales;
+	int m_numTilesX;
+	int m_numTilesY;
 };

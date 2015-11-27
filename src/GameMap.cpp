@@ -312,7 +312,7 @@ void GameMap::Draw(SDL_Renderer* renderer, int scrollX, int scrollY)
 		{
 			for (int x = 0; x < SCREENTILESX; ++x)
 			{
-				SDL_Rect tileRect = { x * 64, y * 64, 64, 64 };
+				SDL_Rect tileRect = { x << 6, y << 6, 64, 64 };
 				int tile = m_tileMaps[i].at(TileIndex(x + (scrollX >> 6), y + (scrollY >> 6)));
 				TexturePtr tileTexture = (tile < 0) ? nullptr : m_textures[tile];
 

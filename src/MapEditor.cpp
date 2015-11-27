@@ -4,7 +4,6 @@
 #include "System.h"
 
 #define TILESIZE 64
-#define STATUSHEIGHT 256
 #define SCREENTILESX (1280 / 64)
 #define SCREENTILESY ((720 + 63) / 64)
 #define MAXCURSORX (SCREENTILESX - 1)
@@ -28,6 +27,7 @@ MapEditor::MapEditor(const System& system)
 	, m_system(system)
 {
 	LoadResources(system);
+	m_brush = m_tileTextures.begin();
 }
 
 bool MapEditor::HandleEvent(SDL_Event& e)
@@ -50,19 +50,29 @@ bool MapEditor::HandleEvent(SDL_Event& e)
 			{
 				case SDL_SCANCODE_LEFTBRACKET:
 				{
-					--m_brush;
+					if (m_brush == m_tileTextures.begin())
+					{
+						m_brush = m_tileTextures.end();
+					}
+
+					m_brush = prev(m_brush);
+
+					m_brushHintShowTime = 2000;
+
 					return true;
 				}
 
 				case SDL_SCANCODE_RIGHTBRACKET:
 				{
-					++m_brush;
-					return true;
-				}
+					m_brush = next(m_brush);
 
-				case SDL_SCANCODE_GRAVE:
-				{
-					m_drawStatus = !m_drawStatus;
+					if (m_brush == m_tileTextures.end())
+					{
+						m_brush = m_tileTextures.begin();
+					}
+
+					m_brushHintShowTime = 2000;
+
 					return true;
 				}
 
@@ -171,16 +181,19 @@ void MapEditor::Update(Uint32 ms)
 	m_scrollX = max(0, min(m_scrollX, MAXSCROLLX));
 	m_scrollY = max(0, min(m_scrollY, MAXSCROLLY));
 
-	if (m_tileTextures.size() > 0)
-	{
-		m_brush = (m_brush < 0) ? m_tileTextures.size() - 1 : m_brush;
-		m_brush = (m_brush > m_tileTextures.size() - 1) ? 0 : m_brush;
-		m_brushTexture = m_tileTextures[m_brush];
-	}
-
 	if (m_paint || m_erase)
 	{
-		m_mapData.SetTile(m_activeLayer, m_cursorX + m_scrollX, m_cursorY + m_scrollY, m_paint ? m_brushTexture : nullptr);
+		m_mapData.SetTile(m_activeLayer, m_cursorX + m_scrollX, m_cursorY + m_scrollY, m_paint ? *m_brush : nullptr);
+	}
+
+	if (m_brushHintShowTime != 0)
+	{
+		m_brushHintShowTime -= ms;
+
+		if (m_brushHintShowTime < 0)
+		{
+			m_brushHintShowTime = 0;
+		}
 	}
 }
 
@@ -210,24 +223,25 @@ void MapEditor::Draw(SDL_Renderer* renderer)
 
 	SDL_RenderCopy(renderer, m_cursor, nullptr, &cursorRect);
 
-	// Draw status area
-	if (m_drawStatus)
+	// Draw status
+	if (m_brushHintShowTime != 0)
 	{
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-		SDL_Rect statusRect = { 0, 720 - STATUSHEIGHT, 1280, STATUSHEIGHT };
-		SDL_RenderFillRect(renderer, &statusRect);
-
-		SDL_Rect brushRect = { statusRect.x + 16, statusRect.y + 16, 64, 64 };
-
-		if (m_brushTexture)
+		int alpha = 255;
+		if (m_brushHintShowTime < 1000)
 		{
-			SDL_RenderCopy(renderer, m_brushTexture, nullptr, &brushRect);
+			alpha = (m_brushHintShowTime * 255) / 1000;
 		}
-		else
+		else if (m_brushHintShowTime > 2000)
 		{
-			SDL_SetRenderDrawColor(renderer, 128, 255, 255, 255);
-			SDL_RenderFillRect(renderer, &brushRect);
+			alpha = ((3000 - m_brushHintShowTime) * 255) / 1000;
 		}
+
+		SDL_SetTextureAlphaMod(*m_brush, alpha);
+		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+		SDL_Rect brushRect = { 16, 16, 64, 64 };
+		SDL_RenderCopy(renderer, *m_brush, nullptr, &brushRect);
+		SDL_SetTextureAlphaMod(*m_brush, 255);
+		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 	}
 }
 

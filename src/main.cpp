@@ -7,7 +7,7 @@ int main(int argc, char** argv)
 {
 	try
 	{
-		System system("Super Ryan Land");
+		System system("Ryanalot's Adventure");
 		SDL_ShowCursor(0);
 
 		GameController gameController(system);

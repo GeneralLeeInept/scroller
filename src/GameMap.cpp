@@ -178,7 +178,7 @@ void GameMap::Load(const string& path, const System& system)
 	}
 }
 
-void GameMap::Save(const string& path)
+void GameMap::Save(const string& path) const
 {
 	FileHandle file(path, "wb");
 
@@ -270,7 +270,17 @@ void GameMap::Save(const string& path)
 	}
 }
 
-int GameMap::GetTile(TileLayer layer, int x, int y)
+int GameMap::GetWidth() const
+{
+	return m_numTilesX;
+}
+
+int GameMap::GetHeight() const
+{
+	return m_numTilesY;
+}
+
+int GameMap::GetTile(TileLayer layer, int x, int y) const
 {
 	return m_tileMaps[layer].at(TileIndex(x, y));
 }
@@ -297,23 +307,33 @@ void GameMap::SetParallaxLayer(int layer, float scrollScale, TexturePtr texture)
 	m_parallaxScrollScales[layer] = 0.0f;
 }
 
-void GameMap::Draw(SDL_Renderer* renderer, int scrollX, int scrollY)
+void GameMap::Draw(SDL_Renderer* renderer, int scrollX, int scrollY) const
 {
 	SDL_Rect screenRect = { 0, 0, 1280, 720 };
 
 	if (m_parallaxLayers.size() > 0 && m_parallaxLayers[0] != -1)
 	{
-		SDL_RenderCopy(renderer, m_textures[m_parallaxLayers[0]], nullptr, &screenRect);
+		SDL_RenderCopy(renderer, (SDL_Texture*)(m_textures[m_parallaxLayers[0]].get()), nullptr, &screenRect);
 	}
+
+	int minScreenX = scrollX;
+	int maxScreenX = scrollX + 1280;
+	int minScreenY = scrollY;
+	int maxScreenY = scrollY + 720;
+
+	int minTileX = minScreenX >> 6;
+	int maxTileX = (maxScreenX + 63) >> 6;
+	int minTileY = (minScreenY) >> 6;
+	int maxTileY = (maxScreenY + 63) >> 6;
 
 	for (int i = 0; i < 3; ++i)
 	{
-		for (int y = 0; y < SCREENTILESY; ++y)
+		for (int y = minTileY; y < maxTileY; ++y)
 		{
-			for (int x = 0; x < SCREENTILESX; ++x)
+			for (int x = minTileX; x < maxTileX; ++x)
 			{
-				SDL_Rect tileRect = { x << 6, y << 6, 64, 64 };
-				int tile = m_tileMaps[i].at(TileIndex(x + (scrollX >> 6), y + (scrollY >> 6)));
+				int tile = m_tileMaps[i].at(TileIndex(x, y));
+				SDL_Rect tileRect = { (x << 6) - scrollX, (y << 6) - scrollY, 64, 64 };
 				TexturePtr tileTexture = (tile < 0) ? nullptr : m_textures[tile];
 
 				if (tileTexture)
@@ -326,7 +346,7 @@ void GameMap::Draw(SDL_Renderer* renderer, int scrollX, int scrollY)
 	}
 }
 
-int GameMap::TileIndex(int x, int y)
+int GameMap::TileIndex(int x, int y) const
 {
 	return y * m_numTilesX + x;
 }

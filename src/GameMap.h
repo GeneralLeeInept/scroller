@@ -18,18 +18,21 @@ public:
 	GameMap(int numTilesX, int numTilesY);
 
 	void Load(const string& path, const System& system);
-	void Save(const string& path);
+	void Save(const string& path) const;
 
-	int GetTile(TileLayer layer, int x, int y);
+	int GetWidth() const;
+	int GetHeight() const;
+
+	int GetTile(TileLayer layer, int x, int y) const;
 	void SetTile(TileLayer layer, int x, int y, TexturePtr texture);
 
 	void SetBackdrop(TexturePtr texture);
 	void SetParallaxLayer(int layer, float scrollScale, TexturePtr texture);
 
-	void Draw(SDL_Renderer* renderer, int scrollX, int scrollY);
+	void Draw(SDL_Renderer* renderer, int scrollX, int scrollY) const;
 
 private:
-	int TileIndex(int x, int y);
+	int TileIndex(int x, int y) const;
 	int AddTexture(TexturePtr texture);
 
 	vector<TexturePtr> m_textures;

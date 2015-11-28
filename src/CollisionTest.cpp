@@ -5,8 +5,6 @@
 #include "CollisionTest.h"
 #include "System.h"
 
-#define MAPWIDTH 20
-#define MAPHEIGHT 11
 #define TILESIZE 64
 #define PLAYERWIDTH 56
 #define PLAYERHEIGHT 112
@@ -17,30 +15,13 @@
 #define HORIZONTAL_ACCELERATION 6400.f
 #define HORIZONTAL_FRICTION 1920.f
 #define HORIZONTAL_ACCELERATION_AIR 3200.f
+#define MINCAMERAX ((1280 / 2) + (16 * TILESIZE))
+#define MAXCAMERAX (MINCAMERAX + (160 - 32) * TILESIZE)
 
 CollisionTest::CollisionTest(System& system)
 {
-	m_mapData.resize(MAPWIDTH * MAPHEIGHT);
-	m_mapData = vector < int >
-	{
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 2, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
-		1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	};
-
-	m_tileTextures.push_back(system.LoadTexture("tiles/creepybricks.png"));
-	m_tileTextures.push_back(system.LoadTexture("tiles/creepybrickstop.png"));
-	m_backdrop = system.LoadTexture("backdrops/spooky.png");
-
-	m_position.Set(128.0f, 192.0f);
+	m_mapData.Load("maps/test.map", system);
+	m_position.Set(19.5f * 64.0f, 21.0f * 64.0f);
 }
 
 bool CollisionTest::HandleEvent(SDL_Event& e)
@@ -55,8 +36,7 @@ bool CollisionTest::HandleEvent(SDL_Event& e)
 			{
 				if (e.type == SDL_KEYDOWN)
 				{
-					m_position.Set(128.0f, 192.0f);
-					//m_position.Set(128.0f, 224.0f);
+					m_position.Set(19.5f * 64.0f, 21.0f * 64.0f);
 					m_velocity.Set(0.0f, 0.0f);
 					m_onGround = false;
 					m_jump = false;
@@ -193,32 +173,20 @@ void CollisionTest::Update(Uint32 ticks)
 			}
 		}
 	}
+
+	m_cameraX = static_cast<int>(m_position.m_x) - 640;// max(MINCAMERAX, min(MAXCAMERAX, static_cast<int>(m_position.m_x)));
+	m_cameraY = static_cast<int>(m_position.m_y) - 360;
 }
 
 void CollisionTest::Draw(SDL_Renderer* renderer)
 {
-	SDL_Rect screenRect = { 0, 0, 1280, 720 };
-	SDL_RenderCopy(renderer, m_backdrop, nullptr, &screenRect);
-
 	// Draw map
-	SDL_SetRenderDrawColor(renderer, 128, 0, 128, 255);
-
-	for (int y = 0; y < MAPHEIGHT; ++y)
-	{
-		for (int x = 0; x < MAPWIDTH; ++x)
-		{
-			int tile = m_mapData.at(x + y * MAPWIDTH);
-
-			if (tile)
-			{
-				SDL_Rect tileRect = { x * TILESIZE, y * TILESIZE, TILESIZE, TILESIZE };
-				SDL_RenderCopy(renderer, m_tileTextures[tile - 1], nullptr, &tileRect);
-			}
-		}
-	}
+	m_mapData.Draw(renderer, m_cameraX, m_cameraY);
 
 	// Draw player
 	SDL_Rect player = { static_cast<int>(m_position.m_x - PLAYERWIDTH * 0.5f), static_cast<int>(m_position.m_y - PLAYERHEIGHT), PLAYERWIDTH, PLAYERHEIGHT };
+	player.x -= m_cameraX;
+	player.y -= m_cameraY;
 	SDL_SetRenderDrawColor(renderer, 128, 0, 0, 255);
 	SDL_RenderFillRect(renderer, &player);
 
@@ -228,12 +196,18 @@ void CollisionTest::Draw(SDL_Renderer* renderer)
 		SDL_Rect drawRect;
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 		currentBounds.ToRect(drawRect);
+		drawRect.x -= m_cameraX;
+		drawRect.y -= m_cameraY;
 		SDL_RenderDrawRect(renderer, &drawRect);
 		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
 		newBounds.ToRect(drawRect);
+		drawRect.x -= m_cameraX;
+		drawRect.y -= m_cameraY;
 		SDL_RenderDrawRect(renderer, &drawRect);
 		SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
 		collisionBox.ToRect(drawRect);
+		drawRect.x -= m_cameraX;
+		drawRect.y -= m_cameraY;
 		SDL_RenderDrawRect(renderer, &drawRect);
 
 		int minTileX = static_cast<int>(collisionBox.MinX()) >> 6;
@@ -243,6 +217,8 @@ void CollisionTest::Draw(SDL_Renderer* renderer)
 		SDL_Rect testTilesRect = { minTileX * 64, minTileY * 64, (maxTileX - minTileX) * 64, (maxTileY - minTileY) * 64 };
 		SDL_SetRenderDrawColor(renderer, 255, 255, 0, 64);
 		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+		testTilesRect.x -= m_cameraX;
+		testTilesRect.y -= m_cameraY;
 		SDL_RenderFillRect(renderer, &testTilesRect);
 		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 
@@ -251,6 +227,8 @@ void CollisionTest::Draw(SDL_Renderer* renderer)
 			SDL_Rect drawRect;
 			SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
 			tile.ToRect(drawRect);
+			drawRect.x -= m_cameraX;
+			drawRect.y -= m_cameraY;
 			SDL_RenderFillRect(renderer, &drawRect);
 		}
 	}
@@ -276,16 +254,16 @@ void CollisionTest::CollisionCheck(Vector2& move, Vector2& posCorrect, float sec
 
 	int minTileX = max(static_cast<int>(collisionBox.MinX()) >> 6, 0);
 	int minTileY = max(static_cast<int>(collisionBox.MinY()) >> 6, 0);
-	int maxTileX = min((static_cast<int>(collisionBox.MaxX()) + 63) >> 6, MAPWIDTH - 1);
-	int maxTileY = min((static_cast<int>(collisionBox.MaxY()) + 63) >> 6, MAPHEIGHT - 1);
+	int maxTileX = min((static_cast<int>(collisionBox.MaxX()) + 63) >> 6, m_mapData.GetWidth() - 1);
+	int maxTileY = min((static_cast<int>(collisionBox.MaxY()) + 63) >> 6, m_mapData.GetHeight() - 1);
 
 	for (int tileY = minTileY; tileY <= maxTileY; ++tileY)
 	{
 		for (int tileX = minTileX; tileX <= maxTileX; ++tileX)
 		{
-			int tile = m_mapData.at(tileY * MAPWIDTH + tileX);
+			int tile = m_mapData.GetTile(GameMap::kPlayground, tileX, tileY);
 
-			if (tile)
+			if (tile != -1)
 			{
 				Aabb tileAabb;
 				tileAabb.m_origin.Set((tileX + 0.5f) * TILESIZE, (tileY + 0.5f) * TILESIZE);
@@ -325,11 +303,11 @@ bool CollisionTest::InternalEdge(const Collision::Hit& hit, int tileX, int tileY
 	int neighbourX = static_cast<int>(tileX + hit.m_normal.m_x);
 	int neighbourY = static_cast<int>(tileY + hit.m_normal.m_y);
 
-	if (neighbourX >= MAPWIDTH || neighbourY >= MAPHEIGHT)
+	if (neighbourX >= m_mapData.GetWidth() || neighbourY >= m_mapData.GetHeight())
 	{
 		return false;
 	}
 
-	int tile = m_mapData.at(neighbourY * MAPWIDTH + neighbourX);
-	return (tile != 0);
+	int tile = m_mapData.GetTile(GameMap::kPlayground, neighbourX, neighbourY);
+	return (tile != -1);
 }

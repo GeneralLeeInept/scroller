@@ -3,6 +3,7 @@
 #include "IGameState.h"
 
 #include "Collision.h"
+#include "GameMap.h"
 #include "Texture.h"
 #include "Vector2.h"
 
@@ -24,7 +25,7 @@ private:
 
 	vector<TexturePtr> m_tileTextures;
 	TexturePtr m_backdrop;
-	vector<int> m_mapData;
+	GameMap m_mapData;
 	Vector2 m_position;
 	Vector2 m_velocity;
 	bool m_onGround = false;
@@ -33,4 +34,6 @@ private:
 	bool m_right = false;
 	bool m_update = false;
 	bool m_diagnostics = false;
+	int m_cameraX = 0;
+	int m_cameraY = 0;
 };

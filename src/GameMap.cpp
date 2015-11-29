@@ -307,6 +307,21 @@ void GameMap::SetParallaxLayer(int layer, float scrollScale, TexturePtr texture)
 	m_parallaxScrollScales[layer] = 0.0f;
 }
 
+#define TILESIZE 64
+#define SCREENTILESX (1280 / 64)
+#define SCREENTILESY ((720 + 63) / 64)
+#define MAPWIDTH (SCREENTILESX * 8)
+#define MAPHEIGHT (SCREENTILESY * 8)
+#define OFFSCREENTILES 16
+
+static const SDL_Rect s_offscreenRects[4] =
+{
+	{ 0, 0, OFFSCREENTILES, MAPHEIGHT },
+	{ MAPWIDTH - OFFSCREENTILES, 0, OFFSCREENTILES, MAPHEIGHT },
+	{ OFFSCREENTILES, 0, MAPWIDTH - 2 * OFFSCREENTILES, OFFSCREENTILES },
+	{ OFFSCREENTILES, MAPHEIGHT - OFFSCREENTILES, MAPWIDTH - 2 * OFFSCREENTILES, OFFSCREENTILES }
+};
+
 void GameMap::Draw(SDL_Renderer* renderer, int scrollX, int scrollY) const
 {
 	SDL_Rect screenRect = { 0, 0, 1280, 720 };
@@ -316,10 +331,23 @@ void GameMap::Draw(SDL_Renderer* renderer, int scrollX, int scrollY) const
 		SDL_RenderCopy(renderer, (SDL_Texture*)(m_textures[m_parallaxLayers[0]].get()), nullptr, &screenRect);
 	}
 
-	int minScreenX = scrollX;
-	int maxScreenX = scrollX + 1280;
-	int minScreenY = scrollY;
+	int minScreenX = max(scrollX, 16 * 64);
+	int maxScreenX = minScreenX + 1280;
+
+	if (maxScreenX > (m_numTilesX - 16) * 64)
+	{
+		maxScreenX = (m_numTilesX - 16) * 64;
+		minScreenX = maxScreenX - 1280;
+	}
+
+	int minScreenY = max(scrollY, 16 * 64);
 	int maxScreenY = scrollY + 720;
+
+	if (maxScreenY > (m_numTilesY - 16) * 64)
+	{
+		maxScreenY = (m_numTilesY - 16) * 64;
+		minScreenY = maxScreenY - 720;
+	}
 
 	int minTileX = minScreenX >> 6;
 	int maxTileX = (maxScreenX + 63) >> 6;
@@ -342,7 +370,20 @@ void GameMap::Draw(SDL_Renderer* renderer, int scrollX, int scrollY) const
 				}
 			}
 		}
+	}
 
+	// Draw overlays
+	SDL_SetRenderDrawColor(renderer, 128, 0, 0, 128);
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+
+	for (int i = 0; i < 4; ++i)
+	{
+		SDL_Rect drawRect = s_offscreenRects[i];
+		drawRect.x = (drawRect.x - scrollX) * TILESIZE;
+		drawRect.y = (drawRect.y - scrollY) * TILESIZE;
+		drawRect.w *= TILESIZE;
+		drawRect.h *= TILESIZE;
+		SDL_RenderFillRect(renderer, &drawRect);
 	}
 }
 

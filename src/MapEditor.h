@@ -29,7 +29,9 @@ private:
 	const System& m_system;
 	GameMap m_mapData;
 	vector<TexturePtr> m_tileTextures;
-	vector<TexturePtr>::iterator m_brush;
+	vector<TexturePtr>::iterator m_tileBrush;
+	vector<TexturePtr> m_backdropTextures;
+	vector<TexturePtr>::iterator m_backdrop;
 	int m_scrollX = 0;
 	int m_scrollY = 0;
 	TexturePtr m_cursor = nullptr;

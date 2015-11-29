@@ -27,7 +27,8 @@ MapEditor::MapEditor(const System& system)
 	, m_system(system)
 {
 	LoadResources(system);
-	m_brush = m_tileTextures.begin();
+	m_tileBrush = m_tileTextures.begin();
+	m_backdrop = m_backdropTextures.begin();
 }
 
 bool MapEditor::HandleEvent(SDL_Event& e)
@@ -50,12 +51,12 @@ bool MapEditor::HandleEvent(SDL_Event& e)
 			{
 				case SDL_SCANCODE_LEFTBRACKET:
 				{
-					if (m_brush == m_tileTextures.begin())
+					if (m_tileBrush == m_tileTextures.begin())
 					{
-						m_brush = m_tileTextures.end();
+						m_tileBrush = m_tileTextures.end();
 					}
 
-					m_brush = prev(m_brush);
+					m_tileBrush = prev(m_tileBrush);
 
 					m_brushHintShowTime = 2000;
 
@@ -64,11 +65,11 @@ bool MapEditor::HandleEvent(SDL_Event& e)
 
 				case SDL_SCANCODE_RIGHTBRACKET:
 				{
-					m_brush = next(m_brush);
+					m_tileBrush = next(m_tileBrush);
 
-					if (m_brush == m_tileTextures.end())
+					if (m_tileBrush == m_tileTextures.end())
 					{
-						m_brush = m_tileTextures.begin();
+						m_tileBrush = m_tileTextures.begin();
 					}
 
 					m_brushHintShowTime = 2000;
@@ -103,6 +104,20 @@ bool MapEditor::HandleEvent(SDL_Event& e)
 				case SDL_SCANCODE_L:
 				{
 					m_mapData.Load("maps/test.map", m_system);
+					return true;
+				}
+
+				case SDL_SCANCODE_B:
+				{
+					m_backdrop = next(m_backdrop);
+
+					if (m_backdrop == m_backdropTextures.end())
+					{
+						m_backdrop = m_backdropTextures.begin();
+					}
+
+					m_mapData.SetBackdrop(*m_backdrop);
+
 					return true;
 				}
 			}
@@ -183,7 +198,7 @@ void MapEditor::Update(Uint32 ms)
 
 	if (m_paint || m_erase)
 	{
-		m_mapData.SetTile(m_activeLayer, m_cursorX + m_scrollX, m_cursorY + m_scrollY, m_paint ? *m_brush : nullptr);
+		m_mapData.SetTile(m_activeLayer, m_cursorX + m_scrollX, m_cursorY + m_scrollY, m_paint ? *m_tileBrush : nullptr);
 	}
 
 	if (m_brushHintShowTime != 0)
@@ -227,6 +242,7 @@ void MapEditor::Draw(SDL_Renderer* renderer)
 	if (m_brushHintShowTime != 0)
 	{
 		int alpha = 255;
+
 		if (m_brushHintShowTime < 1000)
 		{
 			alpha = (m_brushHintShowTime * 255) / 1000;
@@ -236,11 +252,11 @@ void MapEditor::Draw(SDL_Renderer* renderer)
 			alpha = ((3000 - m_brushHintShowTime) * 255) / 1000;
 		}
 
-		SDL_SetTextureAlphaMod(*m_brush, alpha);
+		SDL_SetTextureAlphaMod(*m_tileBrush, alpha);
 		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 		SDL_Rect brushRect = { 16, 16, 64, 64 };
-		SDL_RenderCopy(renderer, *m_brush, nullptr, &brushRect);
-		SDL_SetTextureAlphaMod(*m_brush, 255);
+		SDL_RenderCopy(renderer, *m_tileBrush, nullptr, &brushRect);
+		SDL_SetTextureAlphaMod(*m_tileBrush, 255);
 		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 	}
 }
@@ -250,13 +266,27 @@ void MapEditor::LoadResources(const System& system)
 	m_mapData.SetBackdrop(system.LoadTexture("backdrops/spooky.png"));
 	m_cursor = system.LoadTexture("mapeditor/cursor.png");
 
-	vector<string> textures = system.GetFilesInFolder("tiles/");
+	vector<string> tileTextures = system.GetFilesInFolder("tiles/");
 
-	for (auto path : textures)
+	for (auto path : tileTextures)
 	{
 		try
 		{
 			m_tileTextures.push_back(system.LoadTexture(path));
+		}
+		catch (exception& e)
+		{
+			_CRT_UNUSED(e);
+		}
+	}
+
+	vector<string> backdropTextures = system.GetFilesInFolder("backdrops/");
+
+	for (auto path : backdropTextures)
+	{
+		try
+		{
+			m_backdropTextures.push_back(system.LoadTexture(path));
 		}
 		catch (exception& e)
 		{

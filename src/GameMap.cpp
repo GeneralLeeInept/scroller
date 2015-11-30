@@ -89,7 +89,7 @@ GameMap::GameMap(int numTilesX, int numTilesY)
 
 	for (int i = 0; i < 3; ++i)
 	{
-		m_tileMaps[i].resize(numTiles, -1);
+		m_tileMaps[i].resize(numTiles, 0);
 	}
 }
 
@@ -122,7 +122,10 @@ void GameMap::Load(const string& path, const System& system)
 		m_tileMaps[i].resize(numTiles);
 	}
 
-	for (auto layer : { kBackground, kPlayground, kForeground })
+	for (auto layer :
+	        {
+	            kBackground, kPlayground, kForeground
+	        })
 	{
 		Uint16 dataSize;
 
@@ -152,10 +155,10 @@ void GameMap::Load(const string& path, const System& system)
 				datum = rleTiles[dataPtr++];
 			}
 
-			for (int i = 0; i < count; ++i, ++tile)
-			{
-				m_tileMaps[layer].at(tile) = datum;
-			}
+			auto fillBegin = m_tileMaps[layer].begin() + tile;
+			auto fillEnd = fillBegin + count;
+			fill(fillBegin, fillEnd, datum);
+			tile += count;
 		}
 	}
 
@@ -213,7 +216,10 @@ void GameMap::Save(const string& path) const
 	// Write tiles
 	int numTiles = m_numTilesX * m_numTilesY;
 
-	for (auto layer : { kBackground, kPlayground, kForeground })
+	for (auto layer :
+	        {
+	            kBackground, kPlayground, kForeground
+	        })
 	{
 		vector<Uint16> tiles;
 		tiles.reserve(numTiles);
@@ -221,9 +227,11 @@ void GameMap::Save(const string& path) const
 		for (int tile = 0; tile < numTiles;)
 		{
 			// RLE
-			Uint16 next = static_cast<Uint16>(m_tileMaps[layer].at(tile) + 1);
+			Uint16 next = m_tileMaps[layer].at(tile);
 			Uint16 count = 1;
+
 			for (++tile; (tile < numTiles) && (m_tileMaps[layer].at(tile) == next) && (count < 0x7fff); ++tile, ++count);
+
 			if (count > 1)
 			{
 				tiles.push_back(0x8000 | count);
@@ -351,9 +359,9 @@ void GameMap::Draw(SDL_Renderer* renderer, int scrollX, int scrollY) const
 {
 	SDL_Rect screenRect = { 0, 0, 1280, 720 };
 
-	if (m_parallaxLayers.size() > 0 && m_parallaxLayers[0] != -1)
+	if (m_parallaxLayers.size() > 0 && m_parallaxLayers[0] != 0)
 	{
-		SDL_RenderCopy(renderer, (SDL_Texture*)(m_textures[m_parallaxLayers[0]].get()), nullptr, &screenRect);
+		SDL_RenderCopy(renderer, GetTexture(m_parallaxLayers[0]), nullptr, &screenRect);
 	}
 
 	int minScreenX = max(scrollX, 16 * 64);
@@ -419,16 +427,16 @@ int GameMap::TileIndex(int x, int y) const
 
 int GameMap::AddTexture(TexturePtr texture)
 {
-	int textureIndex = -1;
+	int textureIndex = 0;
 
 	if (texture != nullptr)
 	{
-		textureIndex = find(m_textures.begin(), m_textures.end(), texture) - m_textures.begin();
+		textureIndex = find(m_textures.begin(), m_textures.end(), texture) - m_textures.begin() + 1;
 
-		if (textureIndex >= m_textures.size())
+		if (textureIndex > m_textures.size())
 		{
 			m_textures.push_back(texture);
-			textureIndex = m_textures.size() - 1;
+			textureIndex = m_textures.size();
 		}
 	}
 

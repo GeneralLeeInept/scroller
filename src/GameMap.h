@@ -37,7 +37,7 @@ private:
 	TexturePtr GetTexture(Uint16 id) const;
 
 	vector<TexturePtr> m_textures;
-	vector<int> m_tileMaps[3];
+	vector<Uint16> m_tileMaps[3];
 	vector<int> m_parallaxLayers;
 	vector<float> m_parallaxScrollScales;
 	int m_numTilesX;

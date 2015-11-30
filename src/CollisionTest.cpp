@@ -309,5 +309,5 @@ bool CollisionTest::InternalEdge(const Collision::Hit& hit, int tileX, int tileY
 	}
 
 	int tile = m_mapData.GetTile(GameMap::kPlayground, neighbourX, neighbourY);
-	return (tile != -1);
+	return (tile != 0);
 }

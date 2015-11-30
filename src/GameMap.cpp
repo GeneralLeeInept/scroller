@@ -196,27 +196,36 @@ void GameMap::Save(const string& path) const
 
 	// Write tiles
 	int numTiles = m_numTilesX * m_numTilesY;
-	vector<DiskTile> diskTiles;
-	diskTiles.reserve(numTiles);
 
-	for (int y = 0; y < m_numTilesY; ++y)
+	for (auto layer : { kBackground, kPlayground, kForeground })
 	{
-		for (int x = 0; x < m_numTilesX; ++x)
+		vector<Uint16> tiles;
+		tiles.reserve(numTiles);
+
+		for (int tile = 0; tile < numTiles;)
 		{
-			DiskTile tile = { 0 };
-			int tileIndex = TileIndex(x, y);
-			tile.m_background = (m_tileMaps[kBackground].at(tileIndex) == -1) ? DiskTile::Empty : m_tileMaps[kBackground].at(tileIndex);
-			tile.m_playground = (m_tileMaps[kPlayground].at(tileIndex) == -1) ? DiskTile::Empty : m_tileMaps[kPlayground].at(tileIndex);
-			tile.m_foreground = (m_tileMaps[kForeground].at(tileIndex) == -1) ? DiskTile::Empty : m_tileMaps[kForeground].at(tileIndex);
-			diskTiles.push_back(tile);
+			// RLE
+			Uint16 next = static_cast<Uint16>(m_tileMaps[layer].at(tile) + 1);
+			Uint16 count = 1;
+			for (++tile; (tile < numTiles) && (m_tileMaps[layer].at(tile) == next) && (count < 0x7fff); ++tile, ++count);
+			if (count > 1)
+			{
+				tiles.push_back(0x8000 | count);
+				tiles.push_back(next);
+			}
+			else
+			{
+				tiles.push_back(tile);
+			}
+		}
+
+		Uint16 dataSize = static_cast<Uint16>(tiles.size());
+
+		if (SDL_RWwrite(file, &dataSize, sizeof(Uint16), 1) != 1 || SDL_RWwrite(file, &tiles[0], sizeof(Uint16), dataSize) != dataSize)
+		{
+			throw FileException(path, "failed to write tile data");
 		}
 	}
-
-	if (SDL_RWwrite(file, &diskTiles[0], sizeof(DiskTile), numTiles) != numTiles)
-	{
-		throw FileException(path, "failed to write tile data");
-	}
-
 
 	// Write parallax data
 	vector<DiskParallaxLayer> diskParallaxData;

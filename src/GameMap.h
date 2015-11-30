@@ -34,6 +34,7 @@ public:
 private:
 	int TileIndex(int x, int y) const;
 	int AddTexture(TexturePtr texture);
+	TexturePtr GetTexture(Uint16 id) const;
 
 	vector<TexturePtr> m_textures;
 	vector<int> m_tileMaps[3];

@@ -116,30 +116,46 @@ void GameMap::Load(const string& path, const System& system)
 	m_numTilesY = dh.m_height;
 
 	int numTiles = m_numTilesX * m_numTilesY;
-	vector<DiskTile> tileData;
-	tileData.resize(numTiles);
-
-	if (SDL_RWread(file, &tileData[0], sizeof(DiskTile), numTiles) != numTiles)
-	{
-		throw BadMapException(path, "unexpected end of file loading tile maps");
-	}
 
 	for (int i = 0; i < 3; ++i)
 	{
 		m_tileMaps[i].resize(numTiles);
 	}
 
-	for (int y = 0; y < m_numTilesY; ++y)
+	for (auto layer : { kBackground, kPlayground, kForeground })
 	{
-		for (int x = 0; x < m_numTilesX; ++x)
+		Uint16 dataSize;
+
+		if (SDL_RWread(file, &dataSize, sizeof(Uint16), 1) != 1)
 		{
-			int tileIndex = TileIndex(x, y);
-			m_tileMaps[kBackground].at(tileIndex) = (tileData[tileIndex].m_background == DiskTile::Empty) ? -1 :
-			                                        tileData[tileIndex].m_background;
-			m_tileMaps[kPlayground].at(tileIndex) = (tileData[tileIndex].m_playground == DiskTile::Empty) ? -1 :
-			                                        tileData[tileIndex].m_playground;
-			m_tileMaps[kForeground].at(tileIndex) = (tileData[tileIndex].m_foreground == DiskTile::Empty) ? -1 :
-			                                        tileData[tileIndex].m_foreground;
+			throw BadMapException(path, "unexpected end of file loading tile maps");
+		}
+
+		vector<Uint16> rleTiles;
+		rleTiles.resize(dataSize);
+
+		if (SDL_RWread(file, &rleTiles[0], sizeof(Uint16), dataSize) != dataSize)
+		{
+			throw BadMapException(path, "unexpected end of file loading tile maps");
+		}
+
+		int dataPtr = 0;
+
+		for (int tile = 0; tile < numTiles;)
+		{
+			Uint16 datum = rleTiles[dataPtr++];
+			Uint16 count = 1;
+
+			if ((datum & 0x8000) == 0x8000)
+			{
+				count = datum & 0x7fff;
+				datum = rleTiles[dataPtr++];
+			}
+
+			for (int i = 0; i < count; ++i, ++tile)
+			{
+				m_tileMaps[layer].at(tile) = datum;
+			}
 		}
 	}
 
@@ -369,12 +385,12 @@ void GameMap::Draw(SDL_Renderer* renderer, int scrollX, int scrollY) const
 		{
 			for (int x = minTileX; x < maxTileX; ++x)
 			{
-				int tile = m_tileMaps[i].at(TileIndex(x, y));
-				SDL_Rect tileRect = { (x << 6) - scrollX, (y << 6) - scrollY, 64, 64 };
-				TexturePtr tileTexture = (tile < 0) ? nullptr : m_textures[tile];
+				Uint16 tile = m_tileMaps[i].at(TileIndex(x, y));
 
-				if (tileTexture)
+				if (tile)
 				{
+					TexturePtr tileTexture = GetTexture(tile);
+					SDL_Rect tileRect = { (x << 6) - scrollX, (y << 6) - scrollY, 64, 64 };
 					SDL_RenderCopy(renderer, tileTexture, nullptr, &tileRect);
 				}
 			}
@@ -417,4 +433,14 @@ int GameMap::AddTexture(TexturePtr texture)
 	}
 
 	return textureIndex;
+}
+
+TexturePtr GameMap::GetTexture(Uint16 id) const
+{
+	if (id)
+	{
+		return m_textures.at(id - 1);
+	}
+
+	return nullptr;
 }

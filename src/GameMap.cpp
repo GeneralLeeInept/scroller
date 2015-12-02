@@ -239,7 +239,7 @@ void GameMap::Save(const string& path) const
 			}
 			else
 			{
-				tiles.push_back(tile);
+				tiles.push_back(next);
 			}
 		}
 

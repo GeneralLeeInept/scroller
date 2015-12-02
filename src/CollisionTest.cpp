@@ -3,6 +3,7 @@
 #include "Aabb.h"
 #include "Collision.h"
 #include "CollisionTest.h"
+#include "GameController.h"
 #include "System.h"
 
 #define TILESIZE 64
@@ -18,7 +19,8 @@
 #define MINCAMERAX ((1280 / 2) + (16 * TILESIZE))
 #define MAXCAMERAX (MINCAMERAX + (160 - 32) * TILESIZE)
 
-CollisionTest::CollisionTest(System& system)
+CollisionTest::CollisionTest(System& system, GameController& gameController)
+	: m_gameController(gameController)
 {
 	m_mapData.Load("maps/test.map", system);
 	m_position.Set(19.5f * 64.0f, 18.0f * 64.0f);
@@ -77,6 +79,15 @@ bool CollisionTest::HandleEvent(SDL_Event& e)
 			case SDL_SCANCODE_D:
 			{
 				m_diagnostics = (e.type == SDL_KEYDOWN) ? !m_diagnostics : m_diagnostics;
+				return true;
+			}
+
+			case SDL_SCANCODE_X:
+			{
+				if (e.type == SDL_KEYUP)
+				{
+					m_gameController.GotoState(GameController::kMainMenu);
+				}
 				return true;
 			}
 		}

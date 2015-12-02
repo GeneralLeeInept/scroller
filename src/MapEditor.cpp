@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include "GameController.h"
 #include "MapEditor.h"
 #include "System.h"
 
@@ -22,9 +23,10 @@ static const SDL_Rect s_offscreenRects[4] =
 	{ OFFSCREENTILES, MAPHEIGHT - OFFSCREENTILES, MAPWIDTH - 2 * OFFSCREENTILES, OFFSCREENTILES }
 };
 
-MapEditor::MapEditor(const System& system)
+MapEditor::MapEditor(const System& system, GameController& gameController)
 	: m_mapData(MAPWIDTH, MAPHEIGHT)
 	, m_system(system)
+	, m_gameController(gameController)
 {
 	LoadResources(system);
 	m_tileBrush = m_tileTextures.begin();
@@ -118,6 +120,12 @@ bool MapEditor::HandleEvent(SDL_Event& e)
 
 					m_mapData.SetBackdrop(*m_backdrop);
 
+					return true;
+				}
+
+				case SDL_SCANCODE_X:
+				{
+					m_gameController.GotoState(GameController::kMainMenu);
 					return true;
 				}
 			}

@@ -8,12 +8,13 @@
 #include "Vector2.h"
 
 class Aabb;
+class GameController;
 class System;
 
 class CollisionTest : public IGameState
 {
 public:
-	CollisionTest(System& system);
+	CollisionTest(System& system, GameController& gameController);
 
 	bool HandleEvent(SDL_Event& e);
 	void Update(Uint32 ticks);
@@ -23,6 +24,7 @@ private:
 	void CollisionCheck(Vector2& move, Vector2& posCorrect, float seconds);
 	bool InternalEdge(const Collision::Hit& hit, int tileX, int tileY);
 
+	GameController& m_gameController;
 	vector<TexturePtr> m_tileTextures;
 	TexturePtr m_backdrop;
 	GameMap m_mapData;

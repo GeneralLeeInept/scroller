@@ -5,19 +5,13 @@
 #include "GameMap.h"
 #include "Texture.h"
 
-struct MapData
-{
-	int m_width, m_height;  // in tiles
-	vector<string> m_tileTextures;
-	vector<int> m_tiles;
-};
-
+class GameController;
 class System;
 
 class MapEditor : public IGameState
 {
 public:
-	MapEditor(const System& system);
+	MapEditor(const System& system, GameController& gameController);
 
 	bool HandleEvent(SDL_Event& e);
 	void Update(Uint32 ms);
@@ -27,6 +21,7 @@ private:
 	void LoadResources(const System& system);
 
 	const System& m_system;
+	GameController& m_gameController;
 	GameMap m_mapData;
 	vector<TexturePtr> m_tileTextures;
 	vector<TexturePtr>::iterator m_tileBrush;

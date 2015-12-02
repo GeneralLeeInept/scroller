@@ -85,13 +85,13 @@ void GameController::DoStateChange()
 
 		case kNewGame:
 		{
-			m_currentState.reset(new CollisionTest(m_system));
+			m_currentState.reset(new CollisionTest(m_system, *this));
 			break;
 		}
 
 		case kMapEditor:
 		{
-			m_currentState.reset(new MapEditor(m_system));
+			m_currentState.reset(new MapEditor(m_system, *this));
 			break;
 		}
 	}

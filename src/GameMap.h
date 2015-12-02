@@ -14,6 +14,8 @@ public:
 		kForeground
 	};
 
+	static const Uint16 kEmptyTile = 0;
+
 	GameMap() = default;
 	GameMap(int numTilesX, int numTilesY);
 
@@ -23,7 +25,7 @@ public:
 	int GetWidth() const;
 	int GetHeight() const;
 
-	int GetTile(TileLayer layer, int x, int y) const;
+	Uint16 GetTile(TileLayer layer, int x, int y) const;
 	void SetTile(TileLayer layer, int x, int y, TexturePtr texture);
 
 	void SetBackdrop(TexturePtr texture);
@@ -33,7 +35,7 @@ public:
 
 private:
 	int TileIndex(int x, int y) const;
-	int AddTexture(TexturePtr texture);
+	Uint16 AddTexture(TexturePtr texture);
 	TexturePtr GetTexture(Uint16 id) const;
 
 	vector<TexturePtr> m_textures;

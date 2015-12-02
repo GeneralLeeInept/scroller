@@ -89,7 +89,7 @@ GameMap::GameMap(int numTilesX, int numTilesY)
 
 	for (int i = 0; i < 3; ++i)
 	{
-		m_tileMaps[i].resize(numTiles, 0);
+		m_tileMaps[i].resize(numTiles, kEmptyTile);
 	}
 }
 
@@ -313,7 +313,7 @@ int GameMap::GetHeight() const
 	return m_numTilesY;
 }
 
-int GameMap::GetTile(TileLayer layer, int x, int y) const
+Uint16 GameMap::GetTile(TileLayer layer, int x, int y) const
 {
 	return m_tileMaps[layer].at(TileIndex(x, y));
 }
@@ -425,9 +425,9 @@ int GameMap::TileIndex(int x, int y) const
 	return y * m_numTilesX + x;
 }
 
-int GameMap::AddTexture(TexturePtr texture)
+Uint16 GameMap::AddTexture(TexturePtr texture)
 {
-	int textureIndex = 0;
+	Uint16 textureIndex = 0;
 
 	if (texture != nullptr)
 	{

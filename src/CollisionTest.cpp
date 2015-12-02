@@ -21,7 +21,7 @@
 CollisionTest::CollisionTest(System& system)
 {
 	m_mapData.Load("maps/test.map", system);
-	m_position.Set(19.5f * 64.0f, 21.0f * 64.0f);
+	m_position.Set(19.5f * 64.0f, 18.0f * 64.0f);
 }
 
 bool CollisionTest::HandleEvent(SDL_Event& e)
@@ -36,7 +36,7 @@ bool CollisionTest::HandleEvent(SDL_Event& e)
 			{
 				if (e.type == SDL_KEYDOWN)
 				{
-					m_position.Set(19.5f * 64.0f, 21.0f * 64.0f);
+					m_position.Set(19.5f * 64.0f, 18.0f * 64.0f);
 					m_velocity.Set(0.0f, 0.0f);
 					m_onGround = false;
 					m_jump = false;
@@ -263,7 +263,7 @@ void CollisionTest::CollisionCheck(Vector2& move, Vector2& posCorrect, float sec
 		{
 			int tile = m_mapData.GetTile(GameMap::kPlayground, tileX, tileY);
 
-			if (tile != -1)
+			if (tile != GameMap::kEmptyTile)
 			{
 				Aabb tileAabb;
 				tileAabb.m_origin.Set((tileX + 0.5f) * TILESIZE, (tileY + 0.5f) * TILESIZE);
@@ -303,11 +303,11 @@ bool CollisionTest::InternalEdge(const Collision::Hit& hit, int tileX, int tileY
 	int neighbourX = static_cast<int>(tileX + hit.m_normal.m_x);
 	int neighbourY = static_cast<int>(tileY + hit.m_normal.m_y);
 
-	if (neighbourX >= m_mapData.GetWidth() || neighbourY >= m_mapData.GetHeight())
+	if (neighbourX <= 0 || neighbourX >= m_mapData.GetWidth() || neighbourY <= 0 || neighbourY >= m_mapData.GetHeight())
 	{
 		return false;
 	}
 
 	int tile = m_mapData.GetTile(GameMap::kPlayground, neighbourX, neighbourY);
-	return (tile != 0);
+	return (tile != GameMap::kEmptyTile);
 }

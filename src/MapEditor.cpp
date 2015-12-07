@@ -24,13 +24,13 @@ static const SDL_Rect s_offscreenRects[4] =
 };
 
 MapEditor::MapEditor(const System& system, GameController& gameController)
-	: m_mapData(MAPWIDTH, MAPHEIGHT)
-	, m_system(system)
+	: m_system(system)
 	, m_gameController(gameController)
 {
 	LoadResources(system);
 	m_tileBrush = m_tileTextures.begin();
 	m_backdrop = m_backdropTextures.begin();
+	m_mapData.Load("maps/test.map", m_system);
 }
 
 bool MapEditor::HandleEvent(SDL_Event& e)
@@ -125,7 +125,8 @@ bool MapEditor::HandleEvent(SDL_Event& e)
 
 				case SDL_SCANCODE_X:
 				{
-					m_gameController.GotoState(GameController::kMainMenu);
+					m_mapData.Save("maps/test.map");
+					m_gameController.GotoState(GameController::kNewGame);
 					return true;
 				}
 			}

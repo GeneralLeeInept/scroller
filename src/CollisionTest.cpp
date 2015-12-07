@@ -72,7 +72,7 @@ bool CollisionTest::HandleEvent(SDL_Event& e)
 
 			case SDL_SCANCODE_TAB:
 			{
-				m_update = (e.type == SDL_KEYDOWN) ? !m_update : m_update;
+				//m_update = (e.type == SDL_KEYDOWN) ? !m_update : m_update;
 				return true;
 			}
 
@@ -88,6 +88,7 @@ bool CollisionTest::HandleEvent(SDL_Event& e)
 				{
 					m_gameController.GotoState(GameController::kMainMenu);
 				}
+
 				return true;
 			}
 		}

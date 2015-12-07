@@ -7,6 +7,7 @@
 #include "CollisionTest.h"
 #include "MainMenu.h"
 #include "MapEditor.h"
+#include "SpriteEditor.h"
 
 GameController::GameController(System& system)
 	: m_system(system)
@@ -92,6 +93,12 @@ void GameController::DoStateChange()
 		case kMapEditor:
 		{
 			m_currentState.reset(new MapEditor(m_system, *this));
+			break;
+		}
+
+		case kSpriteEditor:
+		{
+			m_currentState.reset(new SpriteEditor(m_system, *this));
 			break;
 		}
 	}

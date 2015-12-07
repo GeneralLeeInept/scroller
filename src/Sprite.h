@@ -25,13 +25,13 @@ class Sprite
 {
 public:
 
-	Sprite(SpriteDefinition& def);
+	Sprite(const SpriteDefinition& def);
 	~Sprite();
 
 	void PlaySequence(int sequence, bool immediate);
 
 private:
-	SpriteDefinition& m_def;
+	const SpriteDefinition& m_def;
 	int m_sequence;
 	int m_frame;
 	float m_frameTimer;

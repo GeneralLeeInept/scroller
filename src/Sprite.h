@@ -13,7 +13,7 @@ struct SpriteDefinition
 	struct Sequence
 	{
 		int m_numFrames;
-		Frame* m_frames;
+		int m_startFrame;
 	};
 
 	int m_numSequences;
@@ -34,5 +34,5 @@ private:
 	const SpriteDefinition& m_def;
 	int m_sequence;
 	int m_frame;
-	float m_frameTimer;
+	Uint32 m_frameTimer;
 };

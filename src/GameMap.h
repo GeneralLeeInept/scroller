@@ -29,7 +29,7 @@ public:
 	void SetTile(TileLayer layer, int x, int y, TexturePtr texture);
 
 	void SetBackdrop(TexturePtr texture);
-	void SetParallaxLayer(int layer, float scrollScale, TexturePtr texture);
+	void SetParallaxLayer(Uint16 layer, float scrollScale, TexturePtr texture);
 
 	void Draw(SDL_Renderer* renderer, int scrollX, int scrollY) const;
 

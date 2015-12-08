@@ -328,7 +328,7 @@ void GameMap::SetBackdrop(TexturePtr texture)
 	SetParallaxLayer(0, 0.0f, texture);
 }
 
-void GameMap::SetParallaxLayer(int layer, float scrollScale, TexturePtr texture)
+void GameMap::SetParallaxLayer(Uint16 layer, float scrollScale, TexturePtr texture)
 {
 	if (m_parallaxLayers.size() <= layer)
 	{

@@ -126,6 +126,12 @@ void MainMenu::Update(Uint32 ms)
 				break;
 			}
 
+			case kSpriteEditor:
+			{
+				m_gameController.GotoState(GameController::kSpriteEditor);
+				break;
+			}
+
 			case kQuit:
 			{
 				m_gameController.Quit();

@@ -34,7 +34,7 @@ private:
 	bool m_jump = true;
 	bool m_left = false;
 	bool m_right = false;
-	bool m_update = false;
+	bool m_update = true;
 	bool m_diagnostics = false;
 	int m_cameraX = 0;
 	int m_cameraY = 0;

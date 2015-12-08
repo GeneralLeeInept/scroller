@@ -54,7 +54,11 @@
     <ClCompile Include="..\..\src\SystemWindows.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+<<<<<<< HEAD
+    <ClCompile Include="..\..\src\SpriteEditor.cpp">
+=======
     <ClCompile Include="..\..\src\Fixed.cpp">
+>>>>>>> master
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -104,7 +108,11 @@
     <ClInclude Include="..\..\src\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+<<<<<<< HEAD
+    <ClInclude Include="..\..\src\SpriteEditor.h">
+=======
     <ClInclude Include="..\..\src\Fixed.h">
+>>>>>>> master
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

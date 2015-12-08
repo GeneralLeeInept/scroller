@@ -11,7 +11,8 @@ public:
 		kNone,
 		kMainMenu,
 		kNewGame,
-		kMapEditor
+		kMapEditor,
+		kSpriteEditor
 	};
 
 	GameController(System& system);

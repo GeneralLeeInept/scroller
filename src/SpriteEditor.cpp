@@ -108,7 +108,7 @@ void SpriteEditor::MakeTestSprite(const System& system)
 
 		SDL_Point& origin = testSpriteDef.m_frames[frame].m_origin;
 		origin.x = 64;
-		origin.y = 256;
+		origin.y = 256 + static_cast<int>(8.0f * sinf(frame * 0.29f));
 	}
 
 	testSpriteDef.m_sequences.resize(1);

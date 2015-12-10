@@ -2,6 +2,8 @@
 
 #include "Texture.h"
 
+class System;
+
 struct SpriteDefinition
 {
 	struct Frame
@@ -16,23 +18,32 @@ struct SpriteDefinition
 		int m_startFrame;
 	};
 
-	int m_numSequences;
-	Sequence* m_sequences;
+	vector<Frame> m_frames;
+	vector<Sequence> m_sequences;
 	TexturePtr m_texturePage;
+	Uint16 m_ticksPerFrame;
+
+	void Load(const string& path, const System& system);
+	void Save(const string& path);
 };
 
 class Sprite
 {
 public:
-
 	Sprite(const SpriteDefinition& def);
-	~Sprite();
 
-	void PlaySequence(int sequence, bool immediate);
+	SDL_Point& Position();
+	void SetFlip(bool flip);
+
+	void PlaySequence(int sequence);
+	void Update(Uint32 delta);
+	void Render(SDL_Renderer* renderer);
 
 private:
 	const SpriteDefinition& m_def;
-	int m_sequence;
-	int m_frame;
-	Uint32 m_frameTimer;
+	int m_sequence = -1;
+	int m_frame = 0;
+	Uint32 m_frameTimer = 0;
+	SDL_Point m_position;
+	bool m_flipped = false;
 };

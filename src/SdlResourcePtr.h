@@ -21,4 +21,9 @@ public:
 	{
 		return get();
 	}
+
+	operator T*() const
+	{
+		return const_cast<T*>(get());
+	}
 };

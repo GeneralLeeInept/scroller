@@ -98,6 +98,7 @@
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\MainMenu.cpp" />
     <ClCompile Include="..\..\src\MapEditor.cpp" />
+    <ClCompile Include="..\..\src\Sprite.cpp" />
     <ClCompile Include="..\..\src\SpriteEditor.cpp" />
     <ClCompile Include="..\..\src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -113,6 +114,7 @@
     <ClInclude Include="..\..\src\Camera.h" />
     <ClInclude Include="..\..\src\Collision.h" />
     <ClInclude Include="..\..\src\CollisionTest.h" />
+    <ClInclude Include="..\..\src\FileHandle.h" />
     <ClInclude Include="..\..\src\Fixed.h" />
     <ClInclude Include="..\..\src\GameController.h" />
     <ClInclude Include="..\..\src\GameMap.h" />

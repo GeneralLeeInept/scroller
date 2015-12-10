@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include "FileHandle.h"
 #include "System.h"
 
 System::System(const string& title)
@@ -23,7 +24,7 @@ System::System(const string& title)
 		throw exception(SDL_GetError());
 	}
 
-	SDL_SetWindowFullscreen(m_window, SDL_WINDOW_FULLSCREEN);
+	//SDL_SetWindowFullscreen(m_window, SDL_WINDOW_FULLSCREEN);
 
 	m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
@@ -52,9 +53,7 @@ TexturePtr System::LoadTexture(const string& path) const
 
 	if (!image)
 	{
-		stringstream ss;
-		ss << "Failed to laod sprite sheet '" << path << "'";
-		throw exception(ss.str().c_str());
+		throw FileException(path, "failed to load image");
 	}
 
 	SDL_Texture* texture = SDL_CreateTextureFromSurface(GetRenderer(), image);
@@ -63,7 +62,7 @@ TexturePtr System::LoadTexture(const string& path) const
 
 	if (!texture)
 	{
-		throw exception("Failed to create sprite texture");
+		throw BadDataException(path, "failed to create texture");
 	}
 
 	return TexturePtr(texture, path);

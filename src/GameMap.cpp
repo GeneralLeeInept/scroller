@@ -1,13 +1,14 @@
 #include "stdafx.h"
 
+#include "FileHandle.h"
 #include "GameMap.h"
 #include "System.h"
 
-#define MAPMAGIC (('G' << 24) | ('M' << 16) | ('A' << 8) | 'P')
+#define MAPMAGIC FOURCC("GMAP")
 #define SCREENTILESX (1280 / 64)
 #define SCREENTILESY ((720 + 63) / 64)
 
-struct DiskHeader
+struct MapHeader
 {
 	Uint32 m_magic; // 'G','M','A','P'
 	Uint16 m_width; // In tiles
@@ -16,7 +17,7 @@ struct DiskHeader
 	Uint16 m_texturePathsSize;
 };
 
-struct DiskTile
+struct TileHeader
 {
 	static const Uint16 Empty = 0xffff;
 	Uint16 m_background;
@@ -25,60 +26,10 @@ struct DiskTile
 	Uint16 m_padding;
 };
 
-struct DiskParallaxLayer
+struct ParallaxLayer
 {
 	Uint16 m_texture;
 	float m_scrollScale;
-};
-
-class FileException : public runtime_error
-{
-public:
-	FileException(const string& path, const string& what)
-		: runtime_error("FileException: '" + path + "' - " + what)
-	{
-	}
-};
-
-class FileHandle
-{
-public:
-	FileHandle(const string& path, const char* mode)
-	{
-		m_rwops = SDL_RWFromFile(path.c_str(), mode);
-
-		if (!m_rwops)
-		{
-			throw FileException(path, string("failed to open [") + mode + "]");
-		}
-	}
-
-	~FileHandle()
-	{
-		SDL_RWclose(m_rwops);
-	}
-
-	operator SDL_RWops* ()
-	{
-		return m_rwops;
-	}
-
-	SDL_RWops* operator->()
-	{
-		return m_rwops;
-	}
-
-private:
-	SDL_RWops* m_rwops = nullptr;
-};
-
-class BadMapException : public runtime_error
-{
-public:
-	BadMapException(const string& path, const string& what)
-		: runtime_error("Could not load map file '" + path + "' - " + what)
-	{
-	}
 };
 
 GameMap::GameMap(int numTilesX, int numTilesY)
@@ -99,16 +50,16 @@ void GameMap::Load(const string& path, const System& system)
 
 	FileHandle file(path, "rb");
 
-	DiskHeader dh;
+	MapHeader dh;
 
-	if (!SDL_RWread(file, &dh, sizeof(DiskHeader), 1))
+	if (!SDL_RWread(file, &dh, sizeof(MapHeader), 1))
 	{
-		throw BadMapException(path, "invalid format");
+		throw BadDataException(path, "invalid format");
 	}
 
 	if (dh.m_magic != MAPMAGIC)
 	{
-		throw BadMapException(path, "bad header magic");
+		throw BadDataException(path, "bad header magic");
 	}
 
 	// Load tile maps
@@ -131,7 +82,7 @@ void GameMap::Load(const string& path, const System& system)
 
 		if (SDL_RWread(file, &dataSize, sizeof(Uint16), 1) != 1)
 		{
-			throw BadMapException(path, "unexpected end of file loading tile maps");
+			throw BadDataException(path, "unexpected end of file loading tile maps");
 		}
 
 		vector<Uint16> rleTiles;
@@ -139,7 +90,7 @@ void GameMap::Load(const string& path, const System& system)
 
 		if (SDL_RWread(file, &rleTiles[0], sizeof(Uint16), dataSize) != dataSize)
 		{
-			throw BadMapException(path, "unexpected end of file loading tile maps");
+			throw BadDataException(path, "unexpected end of file loading tile maps");
 		}
 
 		int dataPtr = 0;
@@ -165,12 +116,12 @@ void GameMap::Load(const string& path, const System& system)
 	// Load parallax layer data
 	m_parallaxLayers.resize(dh.m_numParallaxLayers);
 	m_parallaxScrollScales.resize(dh.m_numParallaxLayers);
-	vector<DiskParallaxLayer> parallaxLayerData;
+	vector<ParallaxLayer> parallaxLayerData;
 	parallaxLayerData.resize(dh.m_numParallaxLayers);
 
-	if (SDL_RWread(file, &parallaxLayerData[0], sizeof(DiskParallaxLayer), dh.m_numParallaxLayers) != dh.m_numParallaxLayers)
+	if (SDL_RWread(file, &parallaxLayerData[0], sizeof(ParallaxLayer), dh.m_numParallaxLayers) != dh.m_numParallaxLayers)
 	{
-		throw BadMapException(path, "unexpected end of file loading parallax layer data");
+		throw BadDataException(path, "unexpected end of file loading parallax layer data");
 	}
 
 	for (int i = 0; i < dh.m_numParallaxLayers; ++i)
@@ -185,7 +136,7 @@ void GameMap::Load(const string& path, const System& system)
 
 	if (SDL_RWread(file, &packedPaths[0], 1, dh.m_texturePathsSize) != dh.m_texturePathsSize)
 	{
-		throw BadMapException(path, "unexpected end of file loading texture paths");
+		throw BadDataException(path, "unexpected end of file loading texture paths");
 	}
 
 	stringstream unpacker(packedPaths);
@@ -201,7 +152,7 @@ void GameMap::Save(const string& path) const
 {
 	FileHandle file(path, "wb");
 
-	DiskHeader dh;
+	MapHeader dh;
 
 	if (SDL_RWseek(file, sizeof(dh), RW_SEEK_SET) < 0)
 	{
@@ -252,17 +203,17 @@ void GameMap::Save(const string& path) const
 	}
 
 	// Write parallax data
-	vector<DiskParallaxLayer> diskParallaxData;
+	vector<ParallaxLayer> diskParallaxData;
 	int numParallaxLayers = m_parallaxLayers.size();
 	diskParallaxData.reserve(numParallaxLayers);
 
 	for (int i = 0; i < numParallaxLayers; ++i)
 	{
-		DiskParallaxLayer parallaxData = { m_parallaxLayers[i], m_parallaxScrollScales[i] };
+		ParallaxLayer parallaxData = { m_parallaxLayers[i], m_parallaxScrollScales[i] };
 		diskParallaxData.push_back(parallaxData);
 	}
 
-	if (SDL_RWwrite(file, &diskParallaxData[0], sizeof(DiskParallaxLayer), numParallaxLayers) != numParallaxLayers)
+	if (SDL_RWwrite(file, &diskParallaxData[0], sizeof(ParallaxLayer), numParallaxLayers) != numParallaxLayers)
 	{
 		throw FileException(path, "failed to write parallax data");
 	}
@@ -277,7 +228,7 @@ void GameMap::Save(const string& path) const
 
 		if (texturePath.empty())
 		{
-			throw BadMapException(path, "cannot serialise reference to texture without its path");
+			throw BadDataException(path, "cannot serialise reference to texture without its path");
 		}
 
 		texturePaths.push_back(texturePath);

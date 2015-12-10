@@ -11,6 +11,8 @@ class Aabb;
 class GameController;
 class System;
 
+typedef unique_ptr<class Sprite> SpritePtr;
+
 class CollisionTest : public IGameState
 {
 public:
@@ -28,6 +30,7 @@ private:
 	vector<TexturePtr> m_tileTextures;
 	TexturePtr m_backdrop;
 	GameMap m_mapData;
+	SpritePtr m_sprite;
 	Vector2 m_position;
 	Vector2 m_velocity;
 	bool m_onGround = false;

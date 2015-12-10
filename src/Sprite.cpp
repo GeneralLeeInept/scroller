@@ -67,7 +67,7 @@ void SpriteDefinition::Save(const string& path)
 	sh.m_numFrames = m_frames.size();
 	sh.m_numSequences = m_sequences.size();
 	sh.m_ticksPerFrame = m_ticksPerFrame;
-	sh.m_texturePathLength = m_texturePage.GetPath().length();
+	sh.m_texturePathLength = m_texturePage.GetPath().length() + 1;
 
 	if (SDL_RWwrite(file, &sh, sizeof(SpriteHeader), 1) != 1)
 	{
@@ -132,7 +132,7 @@ void Sprite::Update(Uint32 delta)
 	}
 }
 
-void Sprite::Render(SDL_Renderer* renderer)
+void Sprite::Draw(SDL_Renderer* renderer)
 {
 	if (m_sequence >= 0)
 	{

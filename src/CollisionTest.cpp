@@ -4,6 +4,7 @@
 #include "Collision.h"
 #include "CollisionTest.h"
 #include "GameController.h"
+#include "Sprite.h"
 #include "System.h"
 
 #define TILESIZE 64
@@ -19,11 +20,16 @@
 #define MINCAMERAX ((1280 / 2) + (16 * TILESIZE))
 #define MAXCAMERAX (MINCAMERAX + (160 - 32) * TILESIZE)
 
+static SpriteDefinition spriteDef;
+
 CollisionTest::CollisionTest(System& system, GameController& gameController)
 	: m_gameController(gameController)
 {
 	m_mapData.Load("maps/test.map", system);
 	m_position.Set(19.5f * 64.0f, 18.0f * 64.0f);
+	spriteDef.Load("sprites/superryan.spr", system);
+	m_sprite = make_unique<Sprite>(spriteDef);
+	m_sprite->PlaySequence(0);
 }
 
 bool CollisionTest::HandleEvent(SDL_Event& e)
@@ -156,6 +162,8 @@ void CollisionTest::Update(Uint32 ticks)
 	// collision detection & response
 	Vector2 posCorrect;
 	CollisionCheck(move, posCorrect, seconds);
+	
+	Vector2 prevPosition = m_position;
 
 	if (m_update)
 	{
@@ -188,6 +196,19 @@ void CollisionTest::Update(Uint32 ticks)
 
 	m_cameraX = static_cast<int>(m_position.m_x) - 640;// max(MINCAMERAX, min(MAXCAMERAX, static_cast<int>(m_position.m_x)));
 	m_cameraY = static_cast<int>(m_position.m_y) - 360;
+
+	SDL_Point& pos = m_sprite->Position();
+	int prevX = pos.x;
+
+	pos.x = static_cast<int>(m_position.m_x) - m_cameraX;
+	pos.y = static_cast<int>(m_position.m_y) - m_cameraY;
+
+	if (m_position.m_x != prevPosition.m_x)
+	{
+		m_sprite->SetFlip(m_position.m_x < prevPosition.m_x);
+	}
+
+	m_sprite->Update(ticks);
 }
 
 void CollisionTest::Draw(SDL_Renderer* renderer)
@@ -196,15 +217,17 @@ void CollisionTest::Draw(SDL_Renderer* renderer)
 	m_mapData.Draw(renderer, m_cameraX, m_cameraY);
 
 	// Draw player
-	SDL_Rect player = { static_cast<int>(m_position.m_x - PLAYERWIDTH * 0.5f), static_cast<int>(m_position.m_y - PLAYERHEIGHT), PLAYERWIDTH, PLAYERHEIGHT };
-	player.x -= m_cameraX;
-	player.y -= m_cameraY;
-	SDL_SetRenderDrawColor(renderer, 128, 0, 0, 255);
-	SDL_RenderFillRect(renderer, &player);
+	m_sprite->Draw(renderer);
 
 	// Diagnostics
 	if (m_diagnostics)
 	{
+		SDL_Rect playerRect = { static_cast<int>(m_position.m_x - PLAYERWIDTH * 0.5f), static_cast<int>(m_position.m_y - PLAYERHEIGHT), PLAYERWIDTH, PLAYERHEIGHT };
+		playerRect.x -= m_cameraX;
+		playerRect.y -= m_cameraY;
+		SDL_SetRenderDrawColor(renderer, 128, 0, 0, 255);
+		SDL_RenderFillRect(renderer, &playerRect);
+
 		SDL_Rect drawRect;
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 		currentBounds.ToRect(drawRect);

@@ -91,7 +91,7 @@ void SpriteEditor::Draw(SDL_Renderer* renderer)
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
 	//Draw sprite
-	m_sprite->Render(renderer);
+	m_sprite->Draw(renderer);
 }
 
 void SpriteEditor::MakeTestSprite(const System& system)
@@ -108,7 +108,7 @@ void SpriteEditor::MakeTestSprite(const System& system)
 
 		SDL_Point& origin = testSpriteDef.m_frames[frame].m_origin;
 		origin.x = 64;
-		origin.y = 256 + static_cast<int>(8.0f * sinf(frame * 0.29f));
+		origin.y = 256 - 24;// +static_cast<int>(8.0f * sinf(frame * 0.29f));
 	}
 
 	testSpriteDef.m_sequences.resize(1);

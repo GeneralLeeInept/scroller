@@ -37,7 +37,7 @@ public:
 
 	void PlaySequence(int sequence);
 	void Update(Uint32 delta);
-	void Render(SDL_Renderer* renderer);
+	void Draw(SDL_Renderer* renderer);
 
 private:
 	const SpriteDefinition& m_def;

@@ -11,7 +11,7 @@ class Aabb;
 class GameController;
 class System;
 
-typedef unique_ptr<class Sprite> SpritePtr;
+typedef shared_ptr<class Sprite> SpritePtr;
 
 class CollisionTest : public IGameState
 {

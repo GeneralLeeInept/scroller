@@ -4,6 +4,8 @@
 
 class System;
 
+typedef shared_ptr<class Sprite> SpritePtr;
+
 class GameMap
 {
 public:
@@ -31,12 +33,17 @@ public:
 	void SetBackdrop(TexturePtr texture);
 	void SetParallaxLayer(Uint16 layer, float scrollScale, TexturePtr texture);
 
+	void AddSprite(const SpritePtr& sprite);
+	void RemoveSprite(const SpritePtr& sprite);
+
 	void Draw(SDL_Renderer* renderer, int scrollX, int scrollY) const;
 
 private:
 	int TileIndex(int x, int y) const;
 	Uint16 AddTexture(TexturePtr texture);
 	TexturePtr GetTexture(Uint16 id) const;
+	void DrawLayer(SDL_Renderer* renderer, TileLayer layer, int minTileX, int minTileY, int maxTileX, int maxTileY, int scrollX, int scrollY) const;
+	void DrawSprites(SDL_Renderer* renderer, int scrollX, int scrollY) const;
 
 	vector<TexturePtr> m_textures;
 	vector<Uint16> m_tileMaps[3];
@@ -44,4 +51,5 @@ private:
 	vector<float> m_parallaxScrollScales;
 	int m_numTilesX;
 	int m_numTilesY;
+	vector<SpritePtr> m_sprites;
 };

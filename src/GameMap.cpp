@@ -338,23 +338,10 @@ void GameMap::Draw(SDL_Renderer* renderer, int scrollX, int scrollY) const
 	int minTileY = (minScreenY) >> 6;
 	int maxTileY = (maxScreenY + 63) >> 6;
 
-	for (int i = 0; i < 3; ++i)
-	{
-		for (int y = minTileY; y < maxTileY; ++y)
-		{
-			for (int x = minTileX; x < maxTileX; ++x)
-			{
-				Uint16 tile = m_tileMaps[i].at(TileIndex(x, y));
-
-				if (tile)
-				{
-					TexturePtr tileTexture = GetTexture(tile);
-					SDL_Rect tileRect = { (x << 6) - scrollX, (y << 6) - scrollY, 64, 64 };
-					SDL_RenderCopy(renderer, tileTexture, nullptr, &tileRect);
-				}
-			}
-		}
-	}
+	DrawLayer(renderer, kBackground, minTileX, minTileY, maxTileX, maxTileY, scrollX, scrollY);
+	DrawLayer(renderer, kPlayground, minTileX, minTileY, maxTileX, maxTileY, scrollX, scrollY);
+	DrawSprites(renderer, scrollX, scrollY);
+	DrawLayer(renderer, kForeground, minTileX, minTileY, maxTileX, maxTileY, scrollX, scrollY);
 
 	// Draw overlays
 	SDL_SetRenderDrawColor(renderer, 128, 0, 0, 128);
@@ -402,4 +389,27 @@ TexturePtr GameMap::GetTexture(Uint16 id) const
 	}
 
 	return nullptr;
+}
+
+void GameMap::DrawLayer(SDL_Renderer* renderer, TileLayer layer, int minTileX, int minTileY, int maxTileX, int maxTileY, int scrollX, int scrollY) const
+{
+	for (int y = minTileY; y < maxTileY; ++y)
+	{
+		for (int x = minTileX; x < maxTileX; ++x)
+		{
+			Uint16 tile = m_tileMaps[layer].at(TileIndex(x, y));
+
+			if (tile)
+			{
+				TexturePtr tileTexture = GetTexture(tile);
+				SDL_Rect tileRect = { (x << 6) - scrollX, (y << 6) - scrollY, 64, 64 };
+				SDL_RenderCopy(renderer, tileTexture, nullptr, &tileRect);
+			}
+		}
+	}
+}
+
+void GameMap::DrawSprites(SDL_Renderer* renderer, int scrollX, int scrollY) const
+{
+
 }

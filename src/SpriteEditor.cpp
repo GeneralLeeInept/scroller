@@ -31,21 +31,26 @@ bool SpriteEditor::HandleEvent(SDL_Event& event)
 					{
 						m_gameController.GotoState(GameController::kMainMenu);
 					}
+
 					return true;
 				}
+
 				case SDL_SCANCODE_S:
 				{
 					if (event.type == SDL_KEYUP)
 					{
 						testSpriteDef.Save("sprites/superryan.spr");
 					}
+
 					return true;
 				}
+
 				case SDL_SCANCODE_LEFT:
 				{
 					m_left = (event.type == SDL_KEYDOWN);
 					return true;
 				}
+
 				case SDL_SCANCODE_RIGHT:
 				{
 					m_right = (event.type == SDL_KEYDOWN);
@@ -107,8 +112,8 @@ void SpriteEditor::MakeTestSprite(const System& system)
 		dimensions.h = 256;
 
 		SDL_Point& origin = testSpriteDef.m_frames[frame].m_origin;
-		origin.x = 64;
-		origin.y = 256 - 24;// +static_cast<int>(8.0f * sinf(frame * 0.29f));
+		origin.x = 75;
+		origin.y = 234;
 	}
 
 	testSpriteDef.m_sequences.resize(1);

@@ -1,3 +1,3 @@
-Scroller
+# Scroller
 
-A simple 2D side scrolling platform shooter made for fun with SDL2
+A simple 2D side scrolling platform shooter made for fun with SDL2.

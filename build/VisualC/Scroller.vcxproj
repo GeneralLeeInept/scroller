@@ -95,6 +95,7 @@
     <ClCompile Include="..\..\src\Fixed.cpp" />
     <ClCompile Include="..\..\src\GameController.cpp" />
     <ClCompile Include="..\..\src\GameMap.cpp" />
+    <ClCompile Include="..\..\src\Input.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\MainMenu.cpp" />
     <ClCompile Include="..\..\src\MapEditor.cpp" />
@@ -118,7 +119,9 @@
     <ClInclude Include="..\..\src\Fixed.h" />
     <ClInclude Include="..\..\src\GameController.h" />
     <ClInclude Include="..\..\src\GameMap.h" />
+    <ClInclude Include="..\..\src\GamePlay.h" />
     <ClInclude Include="..\..\src\IGameState.h" />
+    <ClInclude Include="..\..\src\Input.h" />
     <ClInclude Include="..\..\src\MainMenu.h" />
     <ClInclude Include="..\..\src\MapEditor.h" />
     <ClInclude Include="..\..\src\SdlResourcePtr.h" />

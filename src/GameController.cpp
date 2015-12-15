@@ -5,14 +5,15 @@
 #include "System.h"
 
 #include "CollisionTest.h"
+#include "Input.h"
 #include "MainMenu.h"
 #include "MapEditor.h"
 #include "SpriteEditor.h"
 
-GameController::GameController(System& system)
+GameController::GameController(System& system, Input& input)
 	: m_system(system)
+	, m_input(input)
 {
-
 }
 
 void GameController::Run()
@@ -29,26 +30,24 @@ void GameController::Run()
 			lastTicks = ticks; // Do a 0 ms update first time
 		}
 
-		//Handle events on queue
+		//Handle events
 		SDL_Event e;
 
 		while (SDL_PollEvent(&e) != 0)
 		{
-			if (!m_currentState || !m_currentState->HandleEvent(e))
+			if (e.type == SDL_QUIT)
 			{
-				if (e.type == SDL_QUIT)
-				{
-					Quit();
-				}
+				Quit();
 			}
 		}
 
+		// Update input
+		m_input.Update();
+
+		// Update state
 		if (m_currentState)
 		{
-			// Update state
 			m_currentState->Update(ticks - lastTicks);
-
-			// Draw
 			m_currentState->Draw(m_system.GetRenderer());
 		}
 		else
@@ -57,7 +56,7 @@ void GameController::Run()
 			SDL_RenderClear(m_system.GetRenderer());
 		}
 
-		// Update screen
+		// Flip
 		SDL_RenderPresent(m_system.GetRenderer());
 
 		lastTicks = ticks;
@@ -80,13 +79,13 @@ void GameController::DoStateChange()
 	{
 		case kMainMenu:
 		{
-			m_currentState.reset(new MainMenu(m_system, *this));
+			m_currentState.reset(new MainMenu(m_system, *this, m_input));
 			break;
 		}
 
 		case kNewGame:
 		{
-			m_currentState.reset(new CollisionTest(m_system, *this));
+			m_currentState.reset(new CollisionTest(m_system, *this, m_input));
 			break;
 		}
 

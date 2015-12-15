@@ -2,6 +2,7 @@
 #include <SDL_image.h>
 
 #include <algorithm>
+#include <bitset>
 #include <functional>
 #include <iostream>
 #include <map>

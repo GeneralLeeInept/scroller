@@ -5,14 +5,14 @@
 #include "Texture.h"
 
 class GameController;
+class Input;
 class System;
 
 class MainMenu : public IGameState
 {
 public:
-	MainMenu(System& system, GameController& gameController);
+	MainMenu(System& system, GameController& gameController, Input& input);
 
-	bool HandleEvent(SDL_Event& event);
 	void Update(Uint32 ms);
 	void Draw(SDL_Renderer* renderer);
 
@@ -27,6 +27,7 @@ private:
 	};
 
 	GameController& m_gameController;
+	Input& m_input;
 	TexturePtr m_backdropImage;
 	TexturePtr m_titleImage;
 	vector<MenuItem> m_menu;

@@ -2,6 +2,7 @@
 
 #include "Fixed.h"
 #include "GameController.h"
+#include "Input.h"
 #include "System.h"
 
 int main(int argc, char** argv)
@@ -9,9 +10,10 @@ int main(int argc, char** argv)
 	try
 	{
 		System system("Ryanalot's Adventure");
-		SDL_ShowCursor(0);
+		Input input;
+		GameController gameController(system, input);
 
-		GameController gameController(system);
+		SDL_ShowCursor(0);
 		gameController.Run();
 	}
 	catch (exception& e)

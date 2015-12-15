@@ -2,6 +2,7 @@
 
 #include "MainMenu.h"
 #include "GameController.h"
+#include "Input.h"
 #include "System.h"
 
 #define NUMITEMS 4
@@ -40,8 +41,9 @@ enum ItemStates
 	kActive
 };
 
-MainMenu::MainMenu(System& system, GameController& gameController)
+MainMenu::MainMenu(System& system, GameController& gameController, Input& input)
 	: m_gameController(gameController)
+	, m_input(input)
 {
 	m_backdropImage = system.LoadTexture("backdrops/spooky.png");
 	m_titleImage = system.LoadTexture("menu/title.png");
@@ -62,6 +64,7 @@ MainMenu::MainMenu(System& system, GameController& gameController)
 	m_menu[0].m_state = kActive;
 }
 
+#if 0
 bool MainMenu::HandleEvent(SDL_Event& event)
 {
 	if (event.type == SDL_KEYDOWN)
@@ -92,6 +95,8 @@ bool MainMenu::HandleEvent(SDL_Event& event)
 
 	return false;
 }
+#endif
+
 
 void MainMenu::Update(Uint32 ms)
 {
@@ -99,6 +104,15 @@ void MainMenu::Update(Uint32 ms)
 	{
 		MenuItem& mi = m_menu.at(i);
 		mi.m_stateTime += ms;
+	}
+
+	if (m_input.PreviousItem())
+	{
+		m_nextActive = (m_activeItem == 0) ? -1 : m_activeItem - 1;
+	}
+	else if (m_input.NextItem())
+	{
+		m_nextActive = (m_activeItem == NUMITEMS - 1) ? -1 : m_activeItem + 1;
 	}
 
 	if (m_nextActive != -1)
@@ -110,7 +124,7 @@ void MainMenu::Update(Uint32 ms)
 		m_activeItem = m_nextActive;
 		m_nextActive = -1;
 	}
-	else if (m_accept)
+	else if (m_input.SelectItem())
 	{
 		switch (m_activeItem)
 		{

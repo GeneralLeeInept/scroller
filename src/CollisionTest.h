@@ -9,6 +9,7 @@
 
 class Aabb;
 class GameController;
+class Input;
 class System;
 
 typedef shared_ptr<class Sprite> SpritePtr;
@@ -16,9 +17,8 @@ typedef shared_ptr<class Sprite> SpritePtr;
 class CollisionTest : public IGameState
 {
 public:
-	CollisionTest(System& system, GameController& gameController);
+	CollisionTest(System& system, GameController& gameController, Input& input);
 
-	bool HandleEvent(SDL_Event& e);
 	void Update(Uint32 ticks);
 	void Draw(SDL_Renderer* renderer);
 
@@ -27,6 +27,7 @@ private:
 	bool InternalEdge(const Collision::Hit& hit, int tileX, int tileY);
 
 	GameController& m_gameController;
+	Input& m_input;
 	vector<TexturePtr> m_tileTextures;
 	TexturePtr m_backdrop;
 	GameMap m_mapData;
@@ -34,9 +35,6 @@ private:
 	Vector2 m_position;
 	Vector2 m_velocity;
 	bool m_onGround = false;
-	bool m_jump = true;
-	bool m_left = false;
-	bool m_right = false;
 	bool m_update = true;
 	bool m_diagnostics = false;
 	int m_cameraX = 0;

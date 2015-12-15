@@ -4,6 +4,7 @@
 #include "Collision.h"
 #include "CollisionTest.h"
 #include "GameController.h"
+#include "Input.h"
 #include "Sprite.h"
 #include "System.h"
 
@@ -22,8 +23,9 @@
 
 static SpriteDefinition spriteDef;
 
-CollisionTest::CollisionTest(System& system, GameController& gameController)
+CollisionTest::CollisionTest(System& system, GameController& gameController, Input& input)
 	: m_gameController(gameController)
+	, m_input(input)
 {
 	m_mapData.Load("maps/test.map", system);
 	m_position.Set(19.5f * 64.0f, 18.0f * 64.0f);
@@ -31,7 +33,7 @@ CollisionTest::CollisionTest(System& system, GameController& gameController)
 	m_sprite = make_unique<Sprite>(spriteDef);
 	m_sprite->PlaySequence(0);
 }
-
+#if 0
 bool CollisionTest::HandleEvent(SDL_Event& e)
 {
 	if (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP)
@@ -102,6 +104,7 @@ bool CollisionTest::HandleEvent(SDL_Event& e)
 
 	return false;
 }
+#endif
 
 Aabb currentBounds;
 Aabb newBounds;
@@ -118,31 +121,30 @@ void CollisionTest::Update(Uint32 ticks)
 
 		if (m_onGround)
 		{
-			if (m_jump)
+			if (m_input.Jump())
 			{
 				m_velocity.m_y = JUMPSPEED;
 				m_onGround = false;
-				//m_update = false;
 			}
 
-			if (m_left)
+			if (m_input.Left())
 			{
 				m_velocity.m_x -= HORIZONTAL_ACCELERATION * seconds;
 			}
 
-			if (m_right)
+			if (m_input.Right())
 			{
 				m_velocity.m_x += HORIZONTAL_ACCELERATION * seconds;
 			}
 		}
 		else
 		{
-			if (m_left)
+			if (m_input.Left())
 			{
 				m_velocity.m_x -= HORIZONTAL_ACCELERATION_AIR * seconds;
 			}
 
-			if (m_right)
+			if (m_input.Right())
 			{
 				m_velocity.m_x += HORIZONTAL_ACCELERATION_AIR * seconds;
 			}
@@ -153,7 +155,6 @@ void CollisionTest::Update(Uint32 ticks)
 		m_velocity.m_y = max(-MAXSPEEDY, min(m_velocity.m_y, MAXSPEEDY));
 
 		m_onGround = false;
-		m_jump = false;
 	}
 
 	Vector2 move;
@@ -203,9 +204,13 @@ void CollisionTest::Update(Uint32 ticks)
 	pos.x = static_cast<int>(m_position.m_x) - m_cameraX;
 	pos.y = static_cast<int>(m_position.m_y) - m_cameraY;
 
-	if (m_position.m_x != prevPosition.m_x)
+	if (m_input.Left())
 	{
-		m_sprite->SetFlip(m_position.m_x < prevPosition.m_x);
+		m_sprite->SetFlip(true);
+	}
+	else if (m_input.Right())
+	{
+		m_sprite->SetFlip(false);
 	}
 
 	m_sprite->Update(ticks);

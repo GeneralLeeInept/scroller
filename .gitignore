@@ -7,3 +7,4 @@ build/lib
 build/obj
 build/VisualC/ipch
 art/raw/sprites
+*.VC.db

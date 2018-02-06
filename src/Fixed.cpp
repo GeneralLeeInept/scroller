@@ -8,27 +8,27 @@
 
 Fixed FixedAdd(Fixed a, Fixed b)
 {
-	return a + b;
+    return a + b;
 }
 
 Fixed FixedSub(Fixed a, Fixed b)
 {
-	return a - b;
+    return a - b;
 }
 
 Fixed FixedMul(Fixed a, Fixed b)
 {
-	return static_cast<Fixed>((static_cast<int64_t>(a)* static_cast<int64_t>(b)) >> 6);
+    return static_cast<Fixed>((static_cast<int64_t>(a) * static_cast<int64_t>(b)) >> 6);
 }
 
 Fixed FixedDiv(Fixed a, Fixed b)
 {
-	return static_cast<Fixed>((static_cast<int64_t>(a) << 6) / b);
+    return static_cast<Fixed>((static_cast<int64_t>(a) << 6) / b);
 }
 
 string FixedFormat(Fixed a)
 {
-	stringstream ss;
-	ss << (a / 64.0f);
-	return ss.str();
+    stringstream ss;
+    ss << (a / 64.0f);
+    return ss.str();
 }

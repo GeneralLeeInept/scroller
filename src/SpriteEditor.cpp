@@ -1,72 +1,41 @@
 #include "stdafx.h"
 
 #include "GameController.h"
+#include "Input.h"
 #include "Sprite.h"
 #include "SpriteEditor.h"
 #include "System.h"
 
 static SpriteDefinition testSpriteDef;
 
-SpriteEditor::SpriteEditor(const System& system, GameController& gameController)
+SpriteEditor::SpriteEditor(const System& system, GameController& gameController, Input& input)
     : m_system(system)
     , m_gameController(gameController)
+    , m_input(input)
 {
     MakeTestSprite(system);
 }
 
-bool SpriteEditor::HandleEvent(SDL_Event& event)
+void SpriteEditor::update_input()
 {
-    switch (event.type)
+    if (m_input.KeyReleased(SDL_SCANCODE_X))
     {
-        case SDL_KEYUP:
-        case SDL_KEYDOWN:
-        {
-            SDL_KeyboardEvent& ke = reinterpret_cast<SDL_KeyboardEvent&>(event);
-
-            switch (ke.keysym.scancode)
-            {
-                case SDL_SCANCODE_X:
-                {
-                    if (event.type == SDL_KEYUP)
-                    {
-                        m_gameController.GotoState(GameController::kMainMenu);
-                    }
-
-                    return true;
-                }
-
-                case SDL_SCANCODE_S:
-                {
-                    if (event.type == SDL_KEYUP)
-                    {
-                        testSpriteDef.Save("sprites/superryan.spr");
-                    }
-
-                    return true;
-                }
-
-                case SDL_SCANCODE_LEFT:
-                {
-                    m_left = (event.type == SDL_KEYDOWN);
-                    return true;
-                }
-
-                case SDL_SCANCODE_RIGHT:
-                {
-                    m_right = (event.type == SDL_KEYDOWN);
-                    return true;
-                }
-            }
-
-            break;
-        }
+        m_gameController.GotoState(GameController::kMainMenu);
     }
 
-    return false;
+    if (m_input.KeyReleased(SDL_SCANCODE_S))
+    {
+        testSpriteDef.Save("sprites/superryan.spr");
+    }
+
+    m_left = m_input.KeyDown(SDL_SCANCODE_LEFT);
+    m_right = m_input.KeyDown(SDL_SCANCODE_RIGHT);
 }
 
 void SpriteEditor::Update(Uint32 ms)
 {
+    update_input();
+
     m_sprite->Update(ms);
 
     SDL_Point& pos = m_sprite->Position();

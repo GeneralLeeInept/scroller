@@ -97,7 +97,7 @@ void GameController::DoStateChange()
 
         case kSpriteEditor:
         {
-            m_currentState.reset(new SpriteEditor(m_system, *this));
+            m_currentState.reset(new SpriteEditor(m_system, *this, m_input));
             break;
         }
     }

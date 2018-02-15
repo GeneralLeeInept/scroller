@@ -5,6 +5,7 @@
 #include <bitset>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <map>
 #include <memory>
 #include <sstream>

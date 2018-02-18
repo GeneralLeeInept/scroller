@@ -9,6 +9,7 @@
 #include <map>
 #include <memory>
 #include <sstream>
+#include <stdint>
 #include <string>
 #include <vector>
 

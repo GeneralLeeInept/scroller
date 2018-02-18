@@ -304,7 +304,12 @@ static const SDL_Rect s_offscreenRects[4] = { { 0, 0, OFFSCREENTILES, MAPHEIGHT 
 
 void GameMap::Draw(SDL_Renderer* renderer, int scrollX, int scrollY) const
 {
-    SDL_Rect screenRect = { 0, 0, 1280, 720 };
+    Draw(renderer, scrollX, scrollY, 0, 0, 1280, 720);
+}
+
+void GameMap::Draw(SDL_Renderer* renderer, int scrollX, int scrollY, int viewRectX, int viewRectY, int viewRectW, int viewRectH) const
+{
+    SDL_Rect screenRect = { viewRectX, viewRectY, viewRectW, viewRectH };
 
     if (m_parallaxLayers.size() > 0 && m_parallaxLayers[0] != 0)
     {

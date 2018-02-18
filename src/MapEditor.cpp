@@ -62,51 +62,19 @@ void MapEditor::Update(Uint32 ms)
 
 void MapEditor::Draw(SDL_Renderer* renderer)
 {
-    // Draw map
-    m_mapData.Draw(renderer, m_scrollX * TILESIZE, m_scrollY * TILESIZE);
-
-    // Draw overlays
-    SDL_SetRenderDrawColor(renderer, 128, 0, 0, 128);
-    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-
-    for (int i = 0; i < 4; ++i)
-    {
-        SDL_Rect drawRect = s_offscreenRects[i];
-        drawRect.x = (drawRect.x - m_scrollX) * TILESIZE;
-        drawRect.y = (drawRect.y - m_scrollY) * TILESIZE;
-        drawRect.w *= TILESIZE;
-        drawRect.h *= TILESIZE;
-        SDL_RenderFillRect(renderer, &drawRect);
-    }
-
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+    SDL_SetRenderDrawColor(renderer, 128, 0, 0, SDL_ALPHA_OPAQUE);
 
-    // Draw cursor
-    SDL_Rect cursorRect = { m_cursorX * TILESIZE, m_cursorY * TILESIZE, TILESIZE, TILESIZE };
+    // Draw map
+    SDL_Rect mapEdit = { 16, 16, 900, 427 };
+    SDL_RenderFillRect(renderer, &mapEdit);
+    m_mapData.Draw(renderer, m_scrollX * TILESIZE, m_scrollY * TILESIZE, 16, 16, 900, 427);
 
-    SDL_RenderCopy(renderer, m_cursor, nullptr, &cursorRect);
+    SDL_Rect miniMap = { 16, 475, 900, 229 };
+    SDL_RenderFillRect(renderer, &miniMap);
 
-    // Draw status
-    if (m_brushHintShowTime != 0)
-    {
-        int alpha = 255;
-
-        if (m_brushHintShowTime < 1000)
-        {
-            alpha = (m_brushHintShowTime * 255) / 1000;
-        }
-        else if (m_brushHintShowTime > 2000)
-        {
-            alpha = ((3000 - m_brushHintShowTime) * 255) / 1000;
-        }
-
-        SDL_SetTextureAlphaMod(*m_tileBrush, alpha);
-        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-        SDL_Rect brushRect = { 16, 16, 64, 64 };
-        SDL_RenderCopy(renderer, *m_tileBrush, nullptr, &brushRect);
-        SDL_SetTextureAlphaMod(*m_tileBrush, 255);
-        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
-    }
+    SDL_Rect tools = { 948, 16, 316, 688 };
+    SDL_RenderFillRect(renderer, &tools);
 }
 
 void MapEditor::LoadResources(const System& system)
@@ -232,4 +200,22 @@ void MapEditor::check_input()
     {
         ++m_scrollY;
     }
+}
+
+void MapEditor::draw_map(int x, int y, int w, int h, float cx, float cy, float zoom)
+{
+    SDL_Rect clip_rect = { x, y, w, h };
+    SDL_RenderSetClipRect(m_system.GetRenderer(), &clip_rect);
+
+    for (MapLayer& layer : _map_data)
+    {
+        int tile_x = 0;
+        int tile_y = 0;
+
+        for (MapRow& row : layer)
+        {
+        }
+    }
+
+    SDL_RenderSetClipRect(m_system.GetRenderer(), nullptr);
 }

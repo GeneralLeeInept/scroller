@@ -37,6 +37,7 @@ public:
     void RemoveSprite(const SpritePtr& sprite);
 
     void Draw(SDL_Renderer* renderer, int scrollX, int scrollY) const;
+    void Draw(SDL_Renderer* renderer, int scrollX, int scrollY, int viewRectX, int viewRectY, int viewRectW, int viewRectH) const;
 
 private:
     int TileIndex(int x, int y) const;

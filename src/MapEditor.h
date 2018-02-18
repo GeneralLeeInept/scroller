@@ -14,13 +14,14 @@ class MapEditor : public IGameState
 public:
     MapEditor(const System& system, GameController& gameController, Input& input);
 
-    bool HandleEvent(SDL_Event& e);
     void Update(Uint32 ms);
     void Draw(SDL_Renderer* renderer);
 
 private:
     void LoadResources(const System& system);
     void check_input();
+
+    void draw_map(int x, int y, int w, int h, float cx, float cy, float zoom);
 
     const System& m_system;
     Input& m_input;
@@ -39,4 +40,11 @@ private:
     bool m_erase = false;
     GameMap::TileLayer m_activeLayer = GameMap::kPlayground;
     int m_brushHintShowTime = 2000;
+
+
+    typedef vector<uint32_t> MapRow;
+    typedef vector<MapRow> MapLayer;
+    typedef vector<MapLayer> Map;
+
+    Map _map_data;
 };

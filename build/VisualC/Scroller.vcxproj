@@ -66,8 +66,8 @@
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
     </ProjectReference>
     <PostBuildEvent>
-      <Command>xcopy /D /Y H:\Development\scroller\deps\SDL2-2.0.7\lib\x86\*.dll $(OutputPath)
-xcopy /D /Y H:\Development\scroller\deps\SDL2_image-2.0.2\lib\x86\*.dll $(OutputPath)</Command>
+      <Command>xcopy /D /Y $(SolutionDir)..\..\deps\SDL2-2.0.7\lib\x86\*.dll $(OutputPath)
+xcopy /D /Y $(SolutionDir)..\..\deps\SDL2_image-2.0.2\lib\x86\*.dll $(OutputPath)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

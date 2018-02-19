@@ -27,9 +27,17 @@ MapEditor::MapEditor(const System& system, GameController& gameController, Input
     , m_input(input)
 {
     LoadResources(system);
-    m_tileBrush = m_tileTextures.begin();
+    m_tileBrush = _tile_textures.begin();
     m_backdrop = m_backdropTextures.begin();
-    m_mapData.Load("maps/test.map", m_system);
+//    m_mapData.Load("maps/test.map", m_system);
+
+    _map_data =
+    {{
+        { 0, 0, 0, 0, 0, 0, 0, 0 },
+        { 0, 0, 0, 0, 0, 0, 0, 0 },
+        { 0, 0, 0, 0, 0, 0, 0, 0 },
+        { 1, 1, 1, 1, 1, 1, 1, 1 },
+    }};
 }
 
 void MapEditor::Update(Uint32 ms)
@@ -63,18 +71,20 @@ void MapEditor::Update(Uint32 ms)
 void MapEditor::Draw(SDL_Renderer* renderer)
 {
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
-    SDL_SetRenderDrawColor(renderer, 128, 0, 0, SDL_ALPHA_OPAQUE);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 
     // Draw map
     SDL_Rect mapEdit = { 16, 16, 900, 427 };
     SDL_RenderFillRect(renderer, &mapEdit);
-    m_mapData.Draw(renderer, m_scrollX * TILESIZE, m_scrollY * TILESIZE, 16, 16, 900, 427);
+    draw_map(renderer, 16, 16, 900, 427, 0.0f, 0.0f, 1.0f);
 
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_Rect miniMap = { 16, 475, 900, 229 };
     SDL_RenderFillRect(renderer, &miniMap);
 
     SDL_Rect tools = { 948, 16, 316, 688 };
     SDL_RenderFillRect(renderer, &tools);
+    draw_tile_palette(renderer, 948, 16, 316, 688, 0.0f, 0.0f, 1.0f);
 }
 
 void MapEditor::LoadResources(const System& system)
@@ -88,7 +98,7 @@ void MapEditor::LoadResources(const System& system)
     {
         try
         {
-            m_tileTextures.push_back(system.LoadTexture(path));
+            _tile_textures.push_back(system.LoadTexture(path));
         }
         catch (exception& e)
         {
@@ -122,9 +132,9 @@ void MapEditor::check_input()
 
     if (m_input.KeyReleased(SDL_SCANCODE_LEFTBRACKET))
     {
-        if (m_tileBrush == m_tileTextures.begin())
+        if (m_tileBrush == _tile_textures.begin())
         {
-            m_tileBrush = m_tileTextures.end();
+            m_tileBrush = _tile_textures.end();
         }
 
         m_tileBrush = prev(m_tileBrush);
@@ -135,9 +145,9 @@ void MapEditor::check_input()
     {
         m_tileBrush = next(m_tileBrush);
 
-        if (m_tileBrush == m_tileTextures.end())
+        if (m_tileBrush == _tile_textures.end())
         {
-            m_tileBrush = m_tileTextures.begin();
+            m_tileBrush = _tile_textures.begin();
         }
 
         m_brushHintShowTime = 2000;
@@ -202,10 +212,12 @@ void MapEditor::check_input()
     }
 }
 
-void MapEditor::draw_map(int x, int y, int w, int h, float cx, float cy, float zoom)
+void MapEditor::draw_map(SDL_Renderer* renderer, int x, int y, int w, int h, float cx, float cy, float zoom)
 {
+    static const int tile_size = 32;
+
     SDL_Rect clip_rect = { x, y, w, h };
-    SDL_RenderSetClipRect(m_system.GetRenderer(), &clip_rect);
+    SDL_RenderSetClipRect(renderer, &clip_rect);
 
     for (MapLayer& layer : _map_data)
     {
@@ -214,6 +226,47 @@ void MapEditor::draw_map(int x, int y, int w, int h, float cx, float cy, float z
 
         for (MapRow& row : layer)
         {
+            for (uint32_t tile : row)
+            {
+                SDL_Rect tile_rect = { x + (tile_x * tile_size), y + (tile_y * tile_size), tile_size, tile_size };
+
+                if (tile)
+                {
+                    TexturePtr tileTexture = _tile_textures[25];
+                    SDL_RenderCopy(renderer, tileTexture, nullptr, &tile_rect);
+                }
+
+                ++tile_x;
+            }
+
+            ++tile_y;
+            tile_x = 0;
+        }
+    }
+
+    SDL_RenderSetClipRect(m_system.GetRenderer(), nullptr);
+}
+
+void MapEditor::draw_tile_palette(SDL_Renderer* renderer, int x, int y, int w, int h, float cx, float cy, float zoom)
+{
+    static const int tile_size = 64;
+
+    SDL_Rect clip_rect = { x, y, w, h };
+    SDL_RenderSetClipRect(renderer, &clip_rect);
+
+    int tiles_per_row = (w + 2) / tile_size;
+    int tile_x = 0;
+    int tile_y = 0;
+
+    for (const TexturePtr& tile_texture : _tile_textures)
+    {
+        SDL_Rect tile_rect = { x + (tile_x * (tile_size + 1)) + 1, y + (tile_y * (tile_size + 1)) + 1, tile_size, tile_size };
+        SDL_RenderCopy(renderer, tile_texture, nullptr, &tile_rect);
+
+        if (++tile_x > tiles_per_row)
+        {
+            tile_x = 0;
+            tile_y++;
         }
     }
 

@@ -21,13 +21,14 @@ private:
     void LoadResources(const System& system);
     void check_input();
 
-    void draw_map(int x, int y, int w, int h, float cx, float cy, float zoom);
+    void draw_map(SDL_Renderer* renderer, int x, int y, int w, int h, float cx, float cy, float zoom);
+    void draw_tile_palette(SDL_Renderer* renderer, int x, int y, int w, int h, float cx, float cy, float zoom);
 
     const System& m_system;
     Input& m_input;
     GameController& m_gameController;
     GameMap m_mapData;
-    vector<TexturePtr> m_tileTextures;
+    vector<TexturePtr> _tile_textures;
     vector<TexturePtr>::iterator m_tileBrush;
     vector<TexturePtr> m_backdropTextures;
     vector<TexturePtr>::iterator m_backdrop;

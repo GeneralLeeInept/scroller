@@ -244,7 +244,7 @@ void MapEditor::draw_map(SDL_Renderer* renderer, int x, int y, int w, int h, flo
         }
     }
 
-    SDL_RenderSetClipRect(m_system.GetRenderer(), nullptr);
+    SDL_RenderSetClipRect(renderer, nullptr);
 }
 
 void MapEditor::draw_tile_palette(SDL_Renderer* renderer, int x, int y, int w, int h, float cx, float cy, float zoom)
@@ -254,21 +254,21 @@ void MapEditor::draw_tile_palette(SDL_Renderer* renderer, int x, int y, int w, i
     SDL_Rect clip_rect = { x, y, w, h };
     SDL_RenderSetClipRect(renderer, &clip_rect);
 
-    int tiles_per_row = (w + 2) / tile_size;
+    int tiles_per_row = w / (tile_size + 4);
     int tile_x = 0;
     int tile_y = 0;
 
     for (const TexturePtr& tile_texture : _tile_textures)
     {
-        SDL_Rect tile_rect = { x + (tile_x * (tile_size + 1)) + 1, y + (tile_y * (tile_size + 1)) + 1, tile_size, tile_size };
+        SDL_Rect tile_rect = { x + (tile_x * (tile_size + 4)) + 2, y + (tile_y * (tile_size + 4)) + 2, tile_size, tile_size };
         SDL_RenderCopy(renderer, tile_texture, nullptr, &tile_rect);
 
-        if (++tile_x > tiles_per_row)
+        if (++tile_x >= tiles_per_row)
         {
             tile_x = 0;
             tile_y++;
         }
     }
 
-    SDL_RenderSetClipRect(m_system.GetRenderer(), nullptr);
+    SDL_RenderSetClipRect(renderer, nullptr);
 }

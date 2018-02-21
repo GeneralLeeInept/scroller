@@ -29,6 +29,6 @@ private:
     System& m_system;
     Input& m_input;
     shared_ptr<IGameState> m_currentState;
-    GameState m_nextState = kMainMenu;
+    GameState m_nextState = kMapEditor;
     bool m_quit = false;
 };

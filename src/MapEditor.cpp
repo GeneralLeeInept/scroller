@@ -15,6 +15,18 @@
 #define MAXSCROLLX (MAPWIDTH - SCREENTILESX)
 #define MAXSCROLLY (MAPHEIGHT - SCREENTILESY)
 
+// Map view rect
+static SDL_Rect s_mapView = { 16, 16, 900, 427 };
+
+// Mini-map view rect
+static SDL_Rect s_miniMapView = { 16, 475, 900, 229 };
+
+// Selected tile
+static SDL_Rect s_selectedTileView = { 948, 16, 64, 64 };
+
+// Tile palette rect
+static SDL_Rect s_tilePaletteView = { 948, 96, 316, 608 };
+
 MapEditor::MapEditor(const System& system, GameController& gameController, Input& input)
     : m_system(system)
     , m_gameController(gameController)
@@ -42,6 +54,13 @@ MapEditor::MapEditor(const System& system, GameController& gameController, Input
         { 22, 22, 25, 25, 25, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22 },
         { 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22 },
     }};
+
+    SDL_ShowCursor(1);
+}
+
+MapEditor::~MapEditor()
+{
+    SDL_ShowCursor(0);
 }
 
 void MapEditor::Update(Uint32 ms)
@@ -65,20 +84,21 @@ void MapEditor::Draw(SDL_Renderer* renderer)
     SDL_RenderClear(renderer);
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-
-    // Draw map
-    SDL_Rect mapEdit = { 16, 16, 900, 427 };
-    SDL_RenderFillRect(renderer, &mapEdit);
-    draw_map(renderer, 16, 16, 900, 427, 0.0f, 0.0f, 1.0f);
+    SDL_RenderFillRect(renderer, &s_mapView);
+    draw_map(renderer, s_mapView.x, s_mapView.y, s_mapView.w, s_mapView.h, 0.0f, 0.0f, 1.0f);
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-    SDL_Rect miniMap = { 16, 475, 900, 229 };
-    SDL_RenderFillRect(renderer, &miniMap);
-    draw_minimap(renderer, 16, 475, 900, 229, 0.0f, 0.0f, 1.0f);
+    SDL_RenderFillRect(renderer, &s_miniMapView);
+    draw_minimap(renderer, s_miniMapView.x, s_miniMapView.y, s_miniMapView.w, s_miniMapView.h, 0.0f, 0.0f, 1.0f);
 
-    SDL_Rect tools = { 948, 16, 316, 688 };
-    SDL_RenderFillRect(renderer, &tools);
-    draw_tile_palette(renderer, 948, 16, 316, 688, 0.0f, 0.0f, 1.0f);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+    SDL_RenderFillRect(renderer, &s_tilePaletteView);
+    draw_tile_palette(renderer, s_tilePaletteView.x, s_tilePaletteView.y, s_tilePaletteView.w, s_tilePaletteView.h, 0.0f, 0.0f, 1.0f);
+
+    if (m_selectedTileTexture != nullptr)
+    {
+        SDL_RenderCopy(renderer, m_selectedTileTexture, nullptr, &s_selectedTileView);
+    }
 }
 
 void MapEditor::LoadResources(const System& system)
@@ -117,11 +137,35 @@ void MapEditor::LoadResources(const System& system)
 void MapEditor::check_input()
 {
     m_input.GetMousePosition(&m_cursorX, &m_cursorY);
-    m_cursorX /= TILESIZE;
-    m_cursorY /= TILESIZE;
 
-    m_paint = m_input.MouseButtonDown(SDL_BUTTON_LEFT);
-    m_erase = m_input.MouseButtonDown(SDL_BUTTON_RIGHT);
+    if (m_input.MouseButtonDown(SDL_BUTTON_LEFT))
+    {
+        SDL_Point click = { m_cursorX, m_cursorY };
+        if (SDL_PointInRect(&click, &s_miniMapView))
+        {
+            m_scrollX = ((m_cursorX - s_miniMapView.x) / 4) - s_mapView.w / 64;
+            m_scrollY = ((m_cursorY - s_miniMapView.y) / 4) - s_mapView.h / 64;
+        }
+        else if (SDL_PointInRect(&click, &s_tilePaletteView))
+        {
+            int view_x = (m_cursorX - s_tilePaletteView.x - 2) / 68;
+            int view_y = (m_cursorY - s_tilePaletteView.y - 2) / 68;
+            int tiles_per_row = s_tilePaletteView.w / 68;
+            int tile_index = view_x + view_y * tiles_per_row;
+
+            if (view_x < tiles_per_row && tile_index >= 0 && tile_index < _tile_textures.size())
+            {
+                m_selectedTile = tile_index + 1;
+                m_selectedTileTexture = _tile_textures[tile_index];
+            }
+        }
+        else if (SDL_PointInRect(&click, &s_mapView) && m_selectedTile)
+        {
+            int view_x = m_scrollX + (m_cursorX - s_mapView.x) / 32;
+            int view_y = m_scrollY + (m_cursorY - s_mapView.y) / 32;
+            _map_data[0][view_y][view_x] = m_selectedTile;
+        }
+    }
 
     if (m_input.KeyDown(SDL_SCANCODE_LEFT))
     {
@@ -203,6 +247,11 @@ void MapEditor::draw_minimap(SDL_Renderer* renderer, int x, int y, int w, int h,
             tile_x = 0;
         }
     }
+
+    SDL_SetRenderDrawColor(renderer, 128, 255, 128, SDL_ALPHA_OPAQUE);
+
+    SDL_Rect zoom_rect = { x + (m_scrollX - 1) * tile_size, y + (m_scrollY - 1) * tile_size, ((s_mapView.w / 32) + 1) * tile_size, ((s_mapView.h / 32) + 1) * tile_size };
+    SDL_RenderDrawRect(renderer, &zoom_rect);
 
     SDL_RenderSetClipRect(renderer, nullptr);
 }

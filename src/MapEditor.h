@@ -13,6 +13,7 @@ class MapEditor : public IGameState
 {
 public:
     MapEditor(const System& system, GameController& gameController, Input& input);
+    ~MapEditor();
 
     void Update(Uint32 ms);
     void Draw(SDL_Renderer* renderer);
@@ -35,9 +36,8 @@ private:
     TexturePtr m_cursor = nullptr;
     int m_cursorX = 0;
     int m_cursorY = 0;
-    bool m_paint = false;
-    bool m_erase = false;
-
+    TexturePtr m_selectedTileTexture = nullptr;
+    int m_selectedTile = 0;
 
     typedef vector<uint32_t> MapRow;
     typedef vector<MapRow> MapLayer;

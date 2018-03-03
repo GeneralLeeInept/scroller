@@ -77,7 +77,7 @@ xcopy /D /Y $(SolutionDir)..\..\deps\SDL2_image-2.0.2\lib\x86\*.dll $(OutputPath
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\deps\SDL2-2.0.3\include;$(SolutionDir)..\..\deps\SDL2_image-2.0.0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\deps\SDL2-2.0.7\include;$(SolutionDir)..\..\deps\SDL2_image-2.0.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
@@ -86,11 +86,15 @@ xcopy /D /Y $(SolutionDir)..\..\deps\SDL2_image-2.0.2\lib\x86\*.dll $(OutputPath
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\..\build\lib\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\..\deps\SDL2-2.0.7\lib\x86;$(SolutionDir)..\..\deps\SDL2_image-2.0.2\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
     </ProjectReference>
+    <PostBuildEvent>
+      <Command>xcopy /D /Y $(SolutionDir)..\..\deps\SDL2-2.0.7\lib\x86\*.dll $(OutputPath)
+xcopy /D /Y $(SolutionDir)..\..\deps\SDL2_image-2.0.2\lib\x86\*.dll $(OutputPath)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Aabb.cpp" />

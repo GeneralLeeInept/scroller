@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" Name="Scroller" Language="1033" Version="1.0.0.0" Manufacturer="Derek Burnheim" UpgradeCode="80694aed-da61-4231-8ff7-93930ef6f401">
+    <Package InstallerVersion="301" Compressed="yes" InstallScope="perMachine" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate EmbedCab='yes' />
+
+    <Feature Id="ProductFeature" Title="Scroller" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentGroupRef Id="InstallFiles" />
+    </Feature>
+
+    <Feature Id="VCRedist" Title="Visual C++ 8.0 Runtime" AllowAdvertise="no" Display="hidden" Level="1">
+        <MergeRef Id="VCRedist"/>
+    </Feature>
+  </Product>
+
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="Scroller" />
+      </Directory>
+
+      <Directory Id="ProgramMenuFolder" Name="Programs">
+        <Directory Id="ProgramMenuDir" Name="Scroller" />
+      </Directory>
+
+      <Directory Id="DesktopFolder" Name="Desktop" />
+    </Directory>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="ProductComponents">
+      <Component Id="Executable" Directory="INSTALLFOLDER">
+        <File Id="ScrollerEXE" Name="Scroller.exe" Source="$(var.scroller.TargetPath)" DiskId="1" KeyPath="yes" />
+      </Component>
+      <Component Id="StartMenuShortcut" Directory="ProgramMenuDir" Guid="{2962D8AE-B8F4-43F3-9711-D16823D57633}" >
+        <Shortcut Id="ScrollerSHORTCUT" Name="Scroller" Target="[#ScrollerEXE]" WorkingDirectory="INSTALLFOLDER" />
+        <RemoveFolder Id="ProgramMenuDir" On="uninstall"/>
+        <RegistryValue Root="HKCU" Key="Software\Derek Burnheim\Scroller" Type="string" Value="" KeyPath="yes"/>
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <Icon Id="Scroller.exe" SourceFile="..\..\..\build\bin\Win32\Release\ryanalot.exe" />
+  </Fragment>
+  <Fragment>
+    <DirectoryRef Id="TARGETDIR">
+      <Merge Id="VCRedist" SourceFile="C:\Program Files (x86)\Common Files\Merge Modules\Microsoft_VC140_CRT_x86.msm" DiskId="1" Language="0"/>
+    </DirectoryRef>
+  </Fragment>
+</Wix>

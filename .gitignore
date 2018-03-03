@@ -2,10 +2,14 @@
 *.vcxproj.user
 *.suo
 *.sdf
+*.VC.db
+*.VC.opendb
+*.wixproj.user
 build/bin
 build/lib
 build/obj
 build/VisualC/ipch
 art/raw/sprites
-*.VC.db
-*.VC.opendb
+build/layout
+build/WiX/Installer/bin
+build/WiX/Installer/obj
